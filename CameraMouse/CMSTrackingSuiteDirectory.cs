@@ -193,7 +193,6 @@ namespace CameraMouseSuite
                 {
                     foreach (Type type in assembly.GetTypes())
                     {
-
                         if (type.IsSubclassOf(trackingType))
                         {
                             bool cont = false;

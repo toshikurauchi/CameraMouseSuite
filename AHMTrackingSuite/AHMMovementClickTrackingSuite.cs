@@ -23,7 +23,7 @@ using CameraMouseSuite;
 
 namespace AHMTrackingSuite
 {
-    //[CMSIgnoreSuiteAtt()]
+    [CMSIgnoreSuiteAtt()]
     public class AHMMovementClickTrackingSuite : CMSTrackingSuite
     {
         

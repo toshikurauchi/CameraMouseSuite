@@ -175,6 +175,9 @@
     <Reference Include="AHMUtility">
       <HintPath>..\lib\AHMUtility.dll</HintPath>
     </Reference>
+    <Reference Include="Castle.Zmq">
+      <HintPath>..\packages\Castle.Zmq.4.0.1\lib\net40\Castle.Zmq.dll</HintPath>
+    </Reference>
     <Reference Include="DirectShowLib-2005, Version=2.0.0.0, Culture=neutral, PublicKeyToken=67e7b740cdfc2d3f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\DirectShowLib-2005.dll</HintPath>
@@ -453,6 +456,7 @@
     <Content Include="App.ico" />
     <Content Include="Logging.txt" />
     <None Include="app.config" />
+    <None Include="packages.config" />
     <None Include="Resources\FormMinimize.bmp" />
     <None Include="Resources\FormMaximize.bmp" />
     <None Include="Resources\exclude.bmp" />
@@ -518,6 +522,7 @@ if not exist userlib md userlib</PreBuildEvent>
 copy $(SolutionDir)lib\cvcam100.dll .
 copy $(SolutionDir)lib\cxcore100.dll .
 copy $(SolutionDir)lib\highgui100.dll .
-copy $(SolutionDir)lib\libguide40.dll .</PostBuildEvent>
+copy $(SolutionDir)lib\libguide40.dll .
+copy $(SolutionDir)lib\libzmq.dll .</PostBuildEvent>
   </PropertyGroup>
 </Project>

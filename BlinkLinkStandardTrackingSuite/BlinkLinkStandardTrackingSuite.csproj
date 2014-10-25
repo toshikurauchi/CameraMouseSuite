@@ -205,7 +205,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>COPY    "$(TargetPath)" "$(SolutionDir)CameraMouse\$(OutDir)slib"</PostBuildEvent>
   </PropertyGroup>
 </Project>
