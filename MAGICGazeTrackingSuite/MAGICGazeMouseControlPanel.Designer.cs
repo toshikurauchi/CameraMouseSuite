@@ -41,6 +41,7 @@
             this.smooth = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.useGridCheckBox = new System.Windows.Forms.CheckBox();
             this.moveMouseCheckBox = new System.Windows.Forms.CheckBox();
             this.checkBoxReverseMouse = new System.Windows.Forms.CheckBox();
             this.exclude_S = new System.Windows.Forms.ComboBox();
@@ -175,6 +176,7 @@
             // 
             // groupBox7
             // 
+            this.groupBox7.Controls.Add(this.useGridCheckBox);
             this.groupBox7.Controls.Add(this.moveMouseCheckBox);
             this.groupBox7.Controls.Add(this.smooth);
             this.groupBox7.Controls.Add(this.label7);
@@ -197,6 +199,17 @@
             this.groupBox7.Size = new System.Drawing.Size(650, 146);
             this.groupBox7.TabIndex = 10;
             this.groupBox7.TabStop = false;
+            // 
+            // useGridCheckBox
+            // 
+            this.useGridCheckBox.AutoSize = true;
+            this.useGridCheckBox.Location = new System.Drawing.Point(169, 19);
+            this.useGridCheckBox.Name = "useGridCheckBox";
+            this.useGridCheckBox.Size = new System.Drawing.Size(67, 17);
+            this.useGridCheckBox.TabIndex = 7;
+            this.useGridCheckBox.Text = "Use Grid";
+            this.useGridCheckBox.UseVisualStyleBackColor = true;
+            this.useGridCheckBox.CheckedChanged += new System.EventHandler(this.useGridCheckBox_CheckedChanged);
             // 
             // moveMouseCheckBox
             // 
@@ -478,6 +491,7 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.ImageList imageList1;
         private System.Windows.Forms.CheckBox moveMouseCheckBox;
+        private System.Windows.Forms.CheckBox useGridCheckBox;
 
     }
 }

@@ -198,6 +198,16 @@ namespace MAGICGazeTrackingSuite
             }
         }
 
+        private void useGridCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!loadingControls)
+            {
+                bool check = useGridCheckBox.Checked;
+                magicGazeClickControlModule.UseGrid = check;
+                sendLogAdvancedTracker();
+            }
+        }
+
         private void ChangeMouseControlItemsEnabled(bool enabled)
         {
             smooth.Enabled = enabled;
@@ -217,6 +227,7 @@ namespace MAGICGazeTrackingSuite
             loadingControls = true;
 
             moveMouseCheckBox.Checked = magicGazeClickControlModule.MoveMouse;
+            useGridCheckBox.Checked = magicGazeClickControlModule.UseGrid;
             ChangeMouseControlItemsEnabled(magicGazeClickControlModule.MoveMouse);
 
             double val = Math.Round(100.0F * magicGazeClickControlModule.EastLimit);

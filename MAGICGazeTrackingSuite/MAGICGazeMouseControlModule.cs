@@ -41,6 +41,7 @@ namespace MAGICGazeTrackingSuite
 
         private bool   reverseHorizontal = false;
         private bool   moveMouse = true;
+        private bool   useGrid = true;
         private double userHorizontalGain = 6.0;
         private double userVerticalGain = 6.0;
         private double damping = 0.65;
@@ -51,10 +52,14 @@ namespace MAGICGazeTrackingSuite
         private bool showPanel = true;
 
         private MAGICGazeTracker gazeTracker;
+        private Point currentCell;
+        private static int hCell = 9;
+        private static int vCell = 5;
 
         public MAGICGazeMouseControlModule()
         {
             this.gazeTracker = new MAGICGazeTracker();
+            currentCell = new Point(-1, -1);
         }
 
         public bool ShowPanel
@@ -77,6 +82,17 @@ namespace MAGICGazeTrackingSuite
             set
             {
                 moveMouse = value;
+            }
+        }
+        public bool UseGrid
+        {
+            get
+            {
+                return useGrid;
+            }
+            set
+            {
+                useGrid = value;
             }
         }
         public bool ReverseHorizontal
@@ -407,13 +423,16 @@ namespace MAGICGazeTrackingSuite
                 firstFrameInControl = false;
             }
             PointF newCursor = AdjustCursor(tempCursor, prevCursorPos);
+
             PointF cursorDirection = new PointF(newCursor.X - prevCursorPos.X, newCursor.Y - prevCursorPos.Y);
-            
-            PointF newGazeCursor = gazeTracker.ProcessMouse(newCursor, cursorDirection, screenWidth, screenHeight);
+            PointF newGazeCursor = newCursor;
+            if (PointFHelper.NormSqr(cursorDirection) >= 25) // 5 pixels
+            {
+                newGazeCursor = ProcessGaze(newCursor);
+            }
             newGazeCursor = ApplyCursorBoundaries(newGazeCursor);
             if (!newGazeCursor.Equals(newCursor))
             {
-                Console.WriteLine("OK");
                 this.screenOriginPoint = newGazeCursor;
             }
             newCursor = newGazeCursor;
@@ -426,6 +445,60 @@ namespace MAGICGazeTrackingSuite
                 int ny = (int)newCursor.Y;
                 SetCursorPosition(nx, ny);
                 lastTickCount = newTickCount;
+            }
+        }
+
+        private PointF ProcessGazedCell(PointF gaze, PointF cursor)
+        {
+            int cellWidth = (int)screenWidth / hCell;
+            int cellHeight = (int)screenHeight / vCell;
+            int xBorder = cellWidth / 2;
+            int yBorder = cellHeight / 2;
+
+            // Min is used for the case in which gaze has maximum coordinates 
+            // (normalized gaze x or y equal to 1)
+            int gazeXCell = Math.Min((int)gaze.X / cellWidth, hCell - 1);
+            int gazeYCell = Math.Min((int)gaze.Y / cellHeight, vCell - 1);
+            
+            if (currentCell.X >= 0 && currentCell.Y >= 0)
+            {
+                int lLimit = currentCell.X * cellWidth - xBorder;
+                int rLimit = (currentCell.X + 1) * cellWidth + xBorder;
+                int bLimit = currentCell.Y * cellHeight - yBorder;
+                int tLimit = (currentCell.Y + 1) * cellHeight + yBorder;
+                if (gaze.X >= lLimit && gaze.X <= rLimit && gaze.Y >= bLimit && gaze.Y <= tLimit)
+                {
+                    return cursor;
+                }
+            }
+            currentCell = new Point(gazeXCell, gazeYCell);
+            return new PointF((gazeXCell + 0.5f) * cellWidth, (gazeYCell + 0.5f) * cellHeight);
+        }
+
+        private PointF ProcessGazedRegion(PointF gaze, PointF cursor)
+        {
+            float maxDist = (float)screenWidth / 6;
+            float sqrDist = PointFHelper.NormSqr(PointFHelper.Subtract(cursor, gaze));
+            if (sqrDist > maxDist * maxDist)
+            {
+                return PointFHelper.ClosestPointToRayInCircle(gaze, maxDist * 0.5f, prevCursorPos, cursor);
+            }
+            else
+            {
+                return cursor;
+            }
+        }
+
+        private PointF ProcessGaze(PointF cursor)
+        {
+            PointF gaze = gazeTracker.GazeOnScreen((float)screenWidth, (float)screenHeight);
+            if (useGrid)
+            {
+                return ProcessGazedCell(gaze, cursor);
+            }
+            else
+            {
+                return ProcessGazedRegion(gaze, cursor);
             }
         }
 

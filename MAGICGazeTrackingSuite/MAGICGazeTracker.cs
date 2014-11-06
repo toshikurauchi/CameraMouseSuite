@@ -19,6 +19,7 @@ using System;
 using System.Text;
 using System.Threading;
 using System.Drawing;
+using System.Collections;
 using Castle.Zmq;
 
 namespace MAGICGazeTrackingSuite
@@ -30,15 +31,16 @@ namespace MAGICGazeTrackingSuite
 
         private Thread clientThread;
         private ManualResetEvent stopEvent;
-        private GazeData gazeData;
+        private ArrayList latestData;
+        private static int FILTER_TIME_WINDOW = 200; // In milliseconds
 
-        public PointF ProcessMouse(PointF cursor, PointF cursorDirection, double screenWidth, double screenHeight)
+        public MAGICGazeTracker()
         {
-            cursorDirection = PointFHelper.Divide(cursorDirection, (float)screenWidth, (float)screenHeight);
-            if (PointFHelper.NormSqr(cursorDirection) < 1e-5)
-            {
-                return cursor;
-            }
+            latestData = ArrayList.Synchronized(new ArrayList());
+        }
+
+        public PointF GazeOnScreen(float screenWidth, float screenHeight)
+        {
             if (clientThread == null)
             {
                 stopEvent = new ManualResetEvent(false);
@@ -46,19 +48,46 @@ namespace MAGICGazeTrackingSuite
                 clientThread.Priority = ThreadPriority.AboveNormal;
                 clientThread.Start();
             }
-            if (gazeData != null && gazeData.GazeIsOnScreen() && DateTime.Now.Subtract(gazeData.LocalTimestamp).Milliseconds < 500)
+
+            UpdateLatestData();
+            PointF gaze = MedianFilteredGazeData();
+            if (gaze.X == -1 && gaze.Y == -1)
             {
-                PointF normCursor = PointFHelper.Divide(cursor, (float)screenWidth);
-                PointF gaze = gazeData.GazeOnScreen;
-                gaze.Y = 1 - gaze.Y; // Adjusting coordinate system
-                double maxDist = 1.0/3;
-                double sqrDist = PointFHelper.NormSqr(PointFHelper.Subtract(normCursor, gaze));
-                if (sqrDist > maxDist * maxDist)
+                return new PointF(-1, -1);
+            }
+            gaze = PointFHelper.Multiply(gaze, screenWidth, screenHeight);
+            gaze.Y = screenHeight - gaze.Y; // Adjusting coordinate system
+            return gaze;
+        }
+
+        private PointF MedianFilteredGazeData()
+        {
+            ArrayList xValues = new ArrayList(latestData.Count);
+            ArrayList yValues = new ArrayList(latestData.Count);
+            foreach (GazeData data in latestData)
+            {
+                xValues.Add(data.GazeOnScreen.X);
+                yValues.Add(data.GazeOnScreen.Y);
+            }
+            xValues.Sort();
+            yValues.Sort();
+            if (xValues.Count == 0 || yValues.Count == 0)
+            {
+                return new PointF(-1, -1);
+            }
+            return new PointF((float)xValues[xValues.Count / 2], (float)yValues[yValues.Count / 2]);
+        }
+
+        private void UpdateLatestData()
+        {
+            for (int i = latestData.Count - 1; i >= 0; i--)
+            {
+                GazeData data = (GazeData)latestData[i];
+                if (data == null || !data.GazeIsOnScreen() || DateTime.Now.Subtract(data.LocalTimestamp).Milliseconds >= FILTER_TIME_WINDOW)
                 {
-                    return PointFHelper.Multiply(gaze, (float)screenWidth, (float)screenHeight);
+                    latestData.RemoveAt(i);
                 }
             }
-            return cursor;
         }
 
         public void ReceiveGazeData()
@@ -83,7 +112,7 @@ namespace MAGICGazeTrackingSuite
                         string msg = Encoding.ASCII.GetString(reply);
                         if (msg.StartsWith("Pupil"))
                         {
-                            gazeData = new GazeData(msg);
+                            latestData.Add(new GazeData(msg));
                         }
                     }
                 }
