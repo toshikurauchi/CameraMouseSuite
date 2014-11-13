@@ -33,10 +33,17 @@ namespace MAGICGazeTrackingSuite
         private ManualResetEvent stopEvent;
         private ArrayList latestData;
         private static int FILTER_TIME_WINDOW = 200; // In milliseconds
+        private bool active = true;
 
         public MAGICGazeTracker()
         {
             latestData = ArrayList.Synchronized(new ArrayList());
+        }
+
+        public bool Active
+        {
+            get { return active; }
+            set { active = value; }
         }
 
         public PointF GazeOnScreen(float screenWidth, float screenHeight)
@@ -51,7 +58,7 @@ namespace MAGICGazeTrackingSuite
 
             UpdateLatestData();
             PointF gaze = MedianFilteredGazeData();
-            if (gaze.X == -1 && gaze.Y == -1)
+            if ((gaze.X == -1 && gaze.Y == -1) || !active)
             {
                 return new PointF(-1, -1);
             }
@@ -110,7 +117,7 @@ namespace MAGICGazeTrackingSuite
                     if (reply != null)
                     {
                         string msg = Encoding.ASCII.GetString(reply);
-                        if (msg.StartsWith("Pupil"))
+                        if (msg.StartsWith("Pupil") && active)
                         {
                             latestData.Add(new GazeData(msg));
                         }

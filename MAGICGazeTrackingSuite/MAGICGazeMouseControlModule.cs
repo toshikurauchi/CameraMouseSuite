@@ -343,32 +343,10 @@ namespace MAGICGazeTrackingSuite
             return cur;
         }
 
-        public PointF ComputeRelCursorInWindow(PointF imagePoint, PointF imageOrigin)
+        public PointF ComputeCursor(PointF imagePoint)
         {
-            PointF absPoint = ComputeCursor(imagePoint, imageOrigin);
-            absPoint.X = absPoint.X / (float)screenWidth;
-            absPoint.Y = absPoint.Y / (float)screenHeight;
-
-            absPoint.X = (float)((absPoint.X - westLimit) / ((1.0 - eastLimit - westLimit)));
-            absPoint.Y = (float)((absPoint.Y - northLimit) / ((1.0 - southLimit - northLimit)));
-
-            if( absPoint.X < 0 )
-                absPoint.X = 0;
-            if( absPoint.Y < 0 )
-                absPoint.Y = 0;
-
-            if( absPoint.X >= 1 )
-                absPoint.X = 1;
-            if( absPoint.Y >= 1 )
-                absPoint.Y = 1;
-
-            return absPoint;
-        }
-
-        public PointF ComputeCursor(PointF imagePoint, PointF imageOrigin)
-        {
-            double difx = imagePoint.X - imageOrigin.X;
-            double dify = imagePoint.Y - imageOrigin.Y;
+            double difx = imagePoint.X - imageOriginPoint.X;
+            double dify = imagePoint.Y - imageOriginPoint.Y;
 
             difx *= this.userHorizontalGain * screenWidth / imageWidth;
             dify *= this.userVerticalGain * screenHeight / imageHeight;
@@ -414,7 +392,7 @@ namespace MAGICGazeTrackingSuite
                 screenOriginPoint = new PointF((float)screenWidth / 2, (float)screenHeight / 2);
             }
 
-            PointF tempCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y), imageOriginPoint);
+            PointF tempCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y));
 
             if( firstFrameInControl )
             {
@@ -426,16 +404,23 @@ namespace MAGICGazeTrackingSuite
 
             PointF cursorDirection = new PointF(newCursor.X - prevCursorPos.X, newCursor.Y - prevCursorPos.Y);
             PointF newGazeCursor = newCursor;
-            if (PointFHelper.NormSqr(cursorDirection) >= 25) // 5 pixels
+            if (PointFHelper.NormSqr(cursorDirection) >= 25) // 5 pixels TODO: this shouldn't be fixed like this
             {
                 newGazeCursor = ProcessGaze(newCursor);
+                gazeTracker.Active = false;
+            }
+            else
+            {
+                gazeTracker.Active = true;
             }
             newGazeCursor = ApplyCursorBoundaries(newGazeCursor);
             if (!newGazeCursor.Equals(newCursor))
             {
                 this.screenOriginPoint = newGazeCursor;
+                tempCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y));
+                newCursor = AdjustCursor(tempCursor, prevCursorPos);
             }
-            newCursor = newGazeCursor;
+            //newCursor = newGazeCursor;
             prevCursorPos = newCursor;
 
             long newTickCount = Environment.TickCount;
@@ -477,11 +462,12 @@ namespace MAGICGazeTrackingSuite
 
         private PointF ProcessGazedRegion(PointF gaze, PointF cursor)
         {
-            float maxDist = (float)screenWidth / 6;
+            float maxDist = (float)screenWidth / 6; // TODO this should be configurable
             float sqrDist = PointFHelper.NormSqr(PointFHelper.Subtract(cursor, gaze));
             if (sqrDist > maxDist * maxDist)
             {
-                return PointFHelper.ClosestPointToRayInCircle(gaze, maxDist * 0.5f, prevCursorPos, cursor);
+                return gaze;
+                //return PointFHelper.ClosestPointToRayInCircle(gaze, maxDist * 0.5f, prevCursorPos, cursor); // TODO distance should be configurable
             }
             else
             {
@@ -492,6 +478,10 @@ namespace MAGICGazeTrackingSuite
         private PointF ProcessGaze(PointF cursor)
         {
             PointF gaze = gazeTracker.GazeOnScreen((float)screenWidth, (float)screenHeight);
+            if (gaze.X < 0 || gaze.Y < 0)
+            {
+                return cursor;
+            }
             if (useGrid)
             {
                 return ProcessGazedCell(gaze, cursor);
