@@ -29,6 +29,18 @@ namespace MAGICGazeTrackingSuite
         private const string SuiteInformalName = "MAGIC Gaze (Advanced)";
         private const string SuiteDescription  = "Uses eye gaze to move cursor to currently gazed region and then cascades to traditional Camera Mouse tracker.";
 
+        public CMSClickControlModuleStandard StandardClickControl
+        {
+            get
+            {
+                return this.clickControlModule as CMSClickControlModuleStandard;
+            }
+            set
+            {
+                this.clickControlModule = value;
+            }
+        }
+
         public MAGICGazeMouseControlModule MAGICGazeMouseControlModule
         {
             get
@@ -47,6 +59,7 @@ namespace MAGICGazeTrackingSuite
 
             MAGICGazeMouseControlModule = new MAGICGazeMouseControlModule();
             this.trackingModule = new CMSTrackingModuleStandard();
+            this.clickControlModule = new CMSClickControlModuleStandard();
             this.name = SuiteName;
             this.informalName = SuiteInformalName;
             this.description = SuiteDescription;

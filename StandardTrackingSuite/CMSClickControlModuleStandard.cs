@@ -194,9 +194,9 @@ namespace CameraMouseSuite
 
         private void LeftMouseClick(int x,int y)
         {
-            User32.mouse_event(2,x,y, 0,0); //Right mouse down at x,y
+            User32.mouse_event(2, x, y, 0, 0); //Right mouse down at x,y
             System.Threading.Thread.Sleep(100);
-            User32.mouse_event(4,x,y, 0,0); //Right mouse up at x,y
+            User32.mouse_event(4, x, y, 0, 0); //Right mouse up at x,y
 
 
             if (CMSLogger.CanCreateLogEvent(false, false, false, "CMSLogClickEvent"))

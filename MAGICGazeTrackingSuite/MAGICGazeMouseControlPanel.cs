@@ -34,10 +34,10 @@ namespace MAGICGazeTrackingSuite
             InitializeComponent();
         }
 
-        private MAGICGazeMouseControlModule magicGazeClickControlModule = null;
-        public void SetMouseControl(MAGICGazeMouseControlModule standardMouseControl)
+        private MAGICGazeMouseControlModule magicGazeMouseControlModule = null;
+        public void SetMouseControl(MAGICGazeMouseControlModule magicMouseControl)
         {
-            this.magicGazeClickControlModule = standardMouseControl;
+            this.magicGazeMouseControlModule = magicMouseControl;
             LoadFromControls();
         }
 
@@ -63,7 +63,7 @@ namespace MAGICGazeTrackingSuite
                     val = 10.5;
                 else if (temp.Equals("Extreme"))
                     val = 12.0;
-                magicGazeClickControlModule.UserHorizontalGain = val;
+                magicGazeMouseControlModule.UserHorizontalGain = val;
                 sendLogAdvancedTracker();
             }
         }
@@ -88,7 +88,7 @@ namespace MAGICGazeTrackingSuite
                     val = 10.5;
                 else if (temp.Equals("Extreme"))
                     val = 12.0;
-                magicGazeClickControlModule.UserVerticalGain = val;
+                magicGazeMouseControlModule.UserVerticalGain = val;
                 sendLogAdvancedTracker();
             }
         }
@@ -99,21 +99,21 @@ namespace MAGICGazeTrackingSuite
             {
                 string val = smooth.SelectedItem.ToString();
                 if (val.Equals("Off"))
-                    magicGazeClickControlModule.Damping = 1.0;
+                    magicGazeMouseControlModule.Damping = 1.0;
                 else if (val.Equals("Very Low"))
-                    magicGazeClickControlModule.Damping = 0.95;
+                    magicGazeMouseControlModule.Damping = 0.95;
                 else if (val.Equals("Low"))
-                    magicGazeClickControlModule.Damping = 0.80;
+                    magicGazeMouseControlModule.Damping = 0.80;
                 else if (val.Equals("Med"))
-                    magicGazeClickControlModule.Damping = 0.65;
+                    magicGazeMouseControlModule.Damping = 0.65;
                 else if (val.Equals("Med High"))
-                    magicGazeClickControlModule.Damping = 0.5;
+                    magicGazeMouseControlModule.Damping = 0.5;
                 else if (val.Equals("High"))
-                    magicGazeClickControlModule.Damping = 0.3;
+                    magicGazeMouseControlModule.Damping = 0.3;
                 else if (val.Equals("Very High"))
-                    magicGazeClickControlModule.Damping = 0.15;
+                    magicGazeMouseControlModule.Damping = 0.15;
                 else if (val.Equals("Extreme"))
-                    magicGazeClickControlModule.Damping = 0.05;
+                    magicGazeMouseControlModule.Damping = 0.05;
                 sendLogAdvancedTracker();
             }
         }
@@ -128,7 +128,7 @@ namespace MAGICGazeTrackingSuite
                     s = "0.0" + s;
                 else
                     s = "0." + s;
-                magicGazeClickControlModule.NorthLimit = Double.Parse(s, CultureInfo.InvariantCulture);
+                magicGazeMouseControlModule.NorthLimit = Double.Parse(s, CultureInfo.InvariantCulture);
                 sendLogAdvancedTracker();
             }
         }
@@ -143,7 +143,7 @@ namespace MAGICGazeTrackingSuite
                     s = "0.0" + s;
                 else
                     s = "0." + s;
-                magicGazeClickControlModule.WestLimit = Double.Parse(s, CultureInfo.InvariantCulture);
+                magicGazeMouseControlModule.WestLimit = Double.Parse(s, CultureInfo.InvariantCulture);
                 sendLogAdvancedTracker();
             }
         }
@@ -158,7 +158,7 @@ namespace MAGICGazeTrackingSuite
                     s = "0.0" + s;
                 else
                     s = "0." + s;
-                magicGazeClickControlModule.EastLimit = Double.Parse(s, CultureInfo.InvariantCulture);
+                magicGazeMouseControlModule.EastLimit = Double.Parse(s, CultureInfo.InvariantCulture);
                 sendLogAdvancedTracker();
             }
         }
@@ -173,7 +173,7 @@ namespace MAGICGazeTrackingSuite
                     s = "0.0" + s;
                 else
                     s = "0." + s;
-                magicGazeClickControlModule.SouthLimit = Double.Parse(s, CultureInfo.InvariantCulture);
+                magicGazeMouseControlModule.SouthLimit = Double.Parse(s, CultureInfo.InvariantCulture);
                 sendLogAdvancedTracker();
             }
         }
@@ -182,7 +182,7 @@ namespace MAGICGazeTrackingSuite
         {
             if (!loadingControls)
             {
-                magicGazeClickControlModule.ReverseHorizontal = this.checkBoxReverseMouse.Checked;
+                magicGazeMouseControlModule.ReverseHorizontal = this.checkBoxReverseMouse.Checked;
                 sendLogAdvancedTracker();
             }
         }
@@ -192,7 +192,7 @@ namespace MAGICGazeTrackingSuite
             if( !loadingControls )
             {
                 bool check = moveMouseCheckBox.Checked;
-                magicGazeClickControlModule.MoveMouse = check;
+                magicGazeMouseControlModule.MoveMouse = check;
                 ChangeMouseControlItemsEnabled(check);
                 sendLogAdvancedTracker();
             }
@@ -203,7 +203,7 @@ namespace MAGICGazeTrackingSuite
             if (!loadingControls)
             {
                 bool check = useGridCheckBox.Checked;
-                magicGazeClickControlModule.UseGrid = check;
+                magicGazeMouseControlModule.UseGrid = check;
                 sendLogAdvancedTracker();
             }
         }
@@ -226,27 +226,27 @@ namespace MAGICGazeTrackingSuite
         {
             loadingControls = true;
 
-            moveMouseCheckBox.Checked = magicGazeClickControlModule.MoveMouse;
-            useGridCheckBox.Checked = magicGazeClickControlModule.UseGrid;
-            ChangeMouseControlItemsEnabled(magicGazeClickControlModule.MoveMouse);
+            moveMouseCheckBox.Checked = magicGazeMouseControlModule.MoveMouse;
+            useGridCheckBox.Checked = magicGazeMouseControlModule.UseGrid;
+            ChangeMouseControlItemsEnabled(magicGazeMouseControlModule.MoveMouse);
 
-            double val = Math.Round(100.0F * magicGazeClickControlModule.EastLimit);
+            double val = Math.Round(100.0F * magicGazeMouseControlModule.EastLimit);
             string temp = ((int)(val)).ToString() + "%";
             this.exclude_E.SelectedItem = temp;
 
-            val = Math.Round(100.0F * magicGazeClickControlModule.WestLimit);
+            val = Math.Round(100.0F * magicGazeMouseControlModule.WestLimit);
             temp = ((int)(val)).ToString() + "%";
             this.exclude_W.SelectedItem = temp;
 
-            val = Math.Round(100.0F * magicGazeClickControlModule.NorthLimit);
+            val = Math.Round(100.0F * magicGazeMouseControlModule.NorthLimit);
             temp = ((int)(val)).ToString() + "%";
             this.exclude_N.SelectedItem = temp;
 
-            val = Math.Round(100.0F * magicGazeClickControlModule.SouthLimit);
+            val = Math.Round(100.0F * magicGazeMouseControlModule.SouthLimit);
             temp = ((int)(val)).ToString() + "%";
             this.exclude_S.SelectedItem = temp;
 
-            val = magicGazeClickControlModule.UserHorizontalGain;
+            val = magicGazeMouseControlModule.UserHorizontalGain;
             if (val == 3.0)
                 this.Horiz_gain.SelectedItem = "Very Low";
             else if (val == 4.5)
@@ -262,7 +262,7 @@ namespace MAGICGazeTrackingSuite
             else if (val == 12.0)
                 this.Horiz_gain.SelectedItem = "Extreme";
 
-            val = magicGazeClickControlModule.UserVerticalGain;
+            val = magicGazeMouseControlModule.UserVerticalGain;
             if (val == 3.0)
                 this.vert_gain.SelectedItem = "Very Low";
             else if (val == 4.5)
@@ -278,7 +278,7 @@ namespace MAGICGazeTrackingSuite
             else if (val == 12.0)
                 this.vert_gain.SelectedItem = "Extreme";
 
-            val = magicGazeClickControlModule.Damping;
+            val = magicGazeMouseControlModule.Damping;
             if (val == 1.0)
                 this.smooth.SelectedItem = "Off";
             else if (val == 0.95)

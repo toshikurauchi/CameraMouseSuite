@@ -47,8 +47,8 @@ namespace CameraMouseSuite
 		public static extern short GetKeyState(int vKEY);
 
 		[DllImport("user32.dll")]
-		public static extern void mouse_event(int dwFlags, 
-			int dx, int dy, int dwData, long dwExtraInfo);
+		public static extern void mouse_event(int dwFlags,
+            int dx, int dy, int dwData, int dwExtraInfo);
 
 		[DllImport("user32.dll")]
 		public static extern int GetSystemMetrics(int id);
