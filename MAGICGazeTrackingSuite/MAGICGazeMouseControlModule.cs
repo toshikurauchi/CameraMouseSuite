@@ -384,42 +384,34 @@ namespace MAGICGazeTrackingSuite
 
             if (!state.Equals(CMSState.ControlTracking))
                 return;
+            // TODO: I stoped here. Trying to think of a way to stop the gaze cursor when the head is moving
 
             Bitmap frame = frames[0];
-            if( firstFrameInControl )
-            {
-                imageOriginPoint = new PointF(imagePoint.X, imagePoint.Y);
-                screenOriginPoint = new PointF((float)screenWidth / 2, (float)screenHeight / 2);
-            }
-
-            PointF tempCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y));
-
-            if( firstFrameInControl )
-            {
-                prevCursorPos.X = tempCursor.X;
-                prevCursorPos.Y = tempCursor.Y;
-                firstFrameInControl = false;
-            }
-            PointF newCursor = AdjustCursor(tempCursor, prevCursorPos);
+            PointF newCursor = ComputeHeadCursor(imagePoint, new PointF((float)screenWidth / 2, (float)screenHeight / 2));
 
             PointF cursorDirection = new PointF(newCursor.X - prevCursorPos.X, newCursor.Y - prevCursorPos.Y);
             PointF newGazeCursor = newCursor;
             if (PointFHelper.NormSqr(cursorDirection) >= 25) // 5 pixels TODO: this shouldn't be fixed like this
             {
-                newGazeCursor = ProcessGaze(newCursor);
                 gazeTracker.Active = false;
             }
             else
             {
                 gazeTracker.Active = true;
+                PointF gazeCursor = ProcessGaze(newCursor);
+                if (PointFHelper.NormSqr(PointFHelper.Subtract(newCursor, gazeCursor)) > 1e-6)
+                {
+                    firstFrameInControl = true;
+                    newGazeCursor = ComputeHeadCursor(imagePoint, gazeCursor);
+                }
             }
             newGazeCursor = ApplyCursorBoundaries(newGazeCursor);
-            if (!newGazeCursor.Equals(newCursor))
+            /*if (!newGazeCursor.Equals(newCursor))
             {
                 this.screenOriginPoint = newGazeCursor;
-                tempCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y));
+                PointF tempCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y));
                 newCursor = AdjustCursor(tempCursor, prevCursorPos);
-            }
+            }*/
             //newCursor = newGazeCursor;
             prevCursorPos = newCursor;
 
@@ -431,6 +423,25 @@ namespace MAGICGazeTrackingSuite
                 SetCursorPosition(nx, ny);
                 lastTickCount = newTickCount;
             }
+        }
+
+        private PointF ComputeHeadCursor(PointF imagePoint, PointF screenOrigin)
+        {
+            if (firstFrameInControl)
+            {
+                imageOriginPoint = new PointF(imagePoint.X, imagePoint.Y);
+                screenOriginPoint = screenOrigin;
+            }
+
+            PointF tempCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y));
+
+            if (firstFrameInControl)
+            {
+                prevCursorPos.X = tempCursor.X;
+                prevCursorPos.Y = tempCursor.Y;
+                firstFrameInControl = false;
+            }
+            return AdjustCursor(tempCursor, prevCursorPos);
         }
 
         private PointF ProcessGazedCell(PointF gaze, PointF cursor)
@@ -462,7 +473,7 @@ namespace MAGICGazeTrackingSuite
 
         private PointF ProcessGazedRegion(PointF gaze, PointF cursor)
         {
-            float maxDist = (float)screenWidth / 6; // TODO this should be configurable
+            float maxDist = (float)screenWidth / 10; // TODO this should be configurable
             float sqrDist = PointFHelper.NormSqr(PointFHelper.Subtract(cursor, gaze));
             if (sqrDist > maxDist * maxDist)
             {
@@ -489,6 +500,7 @@ namespace MAGICGazeTrackingSuite
             else
             {
                 return ProcessGazedRegion(gaze, cursor);
+                //return gaze;
             }
         }
 
