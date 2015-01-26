@@ -41,7 +41,7 @@ namespace MAGICGazeTrackingSuite
 
         private bool   reverseHorizontal = false;
         private bool   moveMouse = true;
-        private bool   useGrid = true;
+        private bool   useGrid = false;
         private double userHorizontalGain = 6.0;
         private double userVerticalGain = 6.0;
         private double damping = 0.65;
@@ -384,8 +384,7 @@ namespace MAGICGazeTrackingSuite
 
             if (!state.Equals(CMSState.ControlTracking))
                 return;
-            // TODO: I stoped here. Trying to think of a way to stop the gaze cursor when the head is moving
-
+            
             Bitmap frame = frames[0];
             PointF newCursor = ComputeHeadCursor(imagePoint, new PointF((float)screenWidth / 2, (float)screenHeight / 2));
 
@@ -406,13 +405,6 @@ namespace MAGICGazeTrackingSuite
                 }
             }
             newGazeCursor = ApplyCursorBoundaries(newGazeCursor);
-            /*if (!newGazeCursor.Equals(newCursor))
-            {
-                this.screenOriginPoint = newGazeCursor;
-                PointF tempCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y));
-                newCursor = AdjustCursor(tempCursor, prevCursorPos);
-            }*/
-            //newCursor = newGazeCursor;
             prevCursorPos = newCursor;
 
             long newTickCount = Environment.TickCount;
@@ -473,12 +465,11 @@ namespace MAGICGazeTrackingSuite
 
         private PointF ProcessGazedRegion(PointF gaze, PointF cursor)
         {
-            float maxDist = (float)screenWidth / 10; // TODO this should be configurable
+            float minDist = (float)screenWidth / 10; // TODO this should be configurable
             float sqrDist = PointFHelper.NormSqr(PointFHelper.Subtract(cursor, gaze));
-            if (sqrDist > maxDist * maxDist)
+            if (sqrDist > minDist * minDist)
             {
                 return gaze;
-                //return PointFHelper.ClosestPointToRayInCircle(gaze, maxDist * 0.5f, prevCursorPos, cursor); // TODO distance should be configurable
             }
             else
             {
@@ -500,7 +491,6 @@ namespace MAGICGazeTrackingSuite
             else
             {
                 return ProcessGazedRegion(gaze, cursor);
-                //return gaze;
             }
         }
 

@@ -32,7 +32,7 @@ namespace MAGICGazeTrackingSuite
         private Thread clientThread;
         private ManualResetEvent stopEvent;
         private ArrayList latestData;
-        private static int FILTER_TIME_WINDOW = 200; // In milliseconds
+        private static int FILTER_TIME_WINDOW = 100; // In milliseconds
         private bool active = true;
 
         public MAGICGazeTracker()
