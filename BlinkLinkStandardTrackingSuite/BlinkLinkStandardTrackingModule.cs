@@ -57,7 +57,7 @@ namespace BlinkLinkStandardTrackingSuite
 
         private bool validTrackPoints = false;
 
-        [DllImport("cv100.dll")]
+        [DllImport("cv100.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern void cvCalcOpticalFlowPyrLK(
             IntPtr old, IntPtr curr, IntPtr oldPyr, IntPtr currPyr,
             [In, Out] CvPoint2D32f[] oldFeatures,

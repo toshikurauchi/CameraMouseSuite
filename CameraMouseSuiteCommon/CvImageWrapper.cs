@@ -38,17 +38,17 @@ namespace CameraMouseSuite
 
 	{
 
-        [DllImport("cxcore100.dll, CallingConvention = CallingConvention.Cdecl")]
+        [DllImport("cxcore100.dll", CallingConvention = CallingConvention.Cdecl)]
 
         private static extern void cvCopy(IntPtr src, IntPtr dst, IntPtr mask);
 
 
-        [DllImport("cxcore100.dll, CallingConvention = CallingConvention.Cdecl")]
+        [DllImport("cxcore100.dll", CallingConvention = CallingConvention.Cdecl)]
 
         private static extern void cvResetImageROI(IntPtr img);
 
 
-        [DllImport("cxcore100.dll, CallingConvention = CallingConvention.Cdecl")] 
+        [DllImport("cxcore100.dll", CallingConvention = CallingConvention.Cdecl)] 
 
         private static extern void cvSetImageROI(IntPtr img, CvRect rect);
 

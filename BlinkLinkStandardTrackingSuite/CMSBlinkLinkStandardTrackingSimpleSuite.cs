@@ -23,7 +23,7 @@ using System.ComponentModel;
 
 namespace BlinkLinkStandardTrackingSuite
 {
-    [CMSIgnoreSuiteAtt()]
+    //[CMSIgnoreSuiteAtt()]
     public class CMSBlinkLinkStandardTrackingSimpleSuite : CMSTrackingSuite
     {
         private const string SuiteName         = "CMSBlinkLinkStandardTrackingSimpleSuite";

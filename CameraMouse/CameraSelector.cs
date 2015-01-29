@@ -41,19 +41,19 @@ namespace CameraMouseSuite
         /// <summary>
         /// DLL calls
         /// </summary>
-        [DllImport("CvCam100.dll")]
+        [DllImport("CvCam100.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern int cvcamGetCamerasCount();
 
-        [DllImport("CvCam100.dll")]
+        [DllImport("CvCam100.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern void cvcamSetProperty(int cid, string pname, ref int temp);
 
-        [DllImport("CvCam100.dll")]
+        [DllImport("CvCam100.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern void cvcamSetProperty(int cid, string pname, IntPtr ptr);
 
-        [DllImport("CvCam100.dll")]
+        [DllImport("CvCam100.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern void cvcamGetProperty(int cid, string pname, ref int temp);
 
-        [DllImport("CvCam100.dll")]
+        [DllImport("CvCam100.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern void cvcamGetProperty(int cid, string pname, byte* ptr);
 
 

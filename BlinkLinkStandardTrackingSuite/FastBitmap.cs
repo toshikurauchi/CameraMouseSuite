@@ -62,7 +62,7 @@ namespace BlinkLinkStandardTrackingSuite
 
     unsafe public class FastBitmap : IDisposable, ICloneable
     {
-        [DllImport("cv100.dll")]
+        [DllImport("cv100.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern void cvSmooth(IntPtr src, IntPtr dst, int smoothtype,
             int param1, int param2, double param3, double param4);
 

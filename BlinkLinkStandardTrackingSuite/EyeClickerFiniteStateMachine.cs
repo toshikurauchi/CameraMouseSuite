@@ -49,8 +49,8 @@ namespace BlinkLinkStandardTrackingSuite
 
     class EyeClickerFiniteStateMachine
     {
-        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        private static extern void mouse_event(long dwFlags, long dx, long dy, long cButtons, long dwExtraInfo);
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
 
         private const int MOUSEEVENTF_LEFTDOWN = 0x02;
         private const int MOUSEEVENTF_LEFTUP = 0x04;

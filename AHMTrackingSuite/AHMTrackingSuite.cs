@@ -26,7 +26,7 @@ namespace AHMTrackingSuite
 {
     public delegate double GetGain();
 
-    [CMSIgnoreSuiteAtt()]
+    //[CMSIgnoreSuiteAtt()]
     public class AHMTrackingSuite : CMSTrackingSuite
     {
         /*
