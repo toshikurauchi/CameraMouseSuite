@@ -24,7 +24,7 @@ using Castle.Zmq;
 
 namespace MAGICGazeTrackingSuite
 {
-    public class MAGICGazeTracker
+    public class PupilGazeTracker : IGazeTracker
     {
         private Context context;
         private Socket client;
@@ -34,10 +34,14 @@ namespace MAGICGazeTrackingSuite
         private ArrayList latestData;
         private static int FILTER_TIME_WINDOW = 100; // In milliseconds
         private bool active = true;
+        private float screenWidth = 0;
+        private float screenHeight = 0;
 
-        public MAGICGazeTracker()
+        public PupilGazeTracker(float screenWidth, float screenHeight)
         {
             latestData = ArrayList.Synchronized(new ArrayList());
+            this.screenWidth = screenWidth;
+            this.screenHeight = screenHeight;
         }
 
         public bool Active
@@ -46,7 +50,7 @@ namespace MAGICGazeTrackingSuite
             set { active = value; }
         }
 
-        public PointF GazeOnScreen(float screenWidth, float screenHeight)
+        public PointF CurrentGaze()
         {
             if (clientThread == null)
             {
@@ -130,7 +134,7 @@ namespace MAGICGazeTrackingSuite
             }
         }
 
-        public void stop()
+        public void Stop()
         {
             if (clientThread != null)
             {

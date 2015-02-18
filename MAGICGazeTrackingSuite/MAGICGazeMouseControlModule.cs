@@ -51,14 +51,14 @@ namespace MAGICGazeTrackingSuite
         private double northLimit = 0.0;
         private bool showPanel = true;
 
-        private MAGICGazeTracker gazeTracker;
+        private IGazeTracker gazeTracker;
         private Point currentCell;
         private static int hCell = 9;
         private static int vCell = 5;
 
         public MAGICGazeMouseControlModule()
         {
-            this.gazeTracker = new MAGICGazeTracker();
+            this.gazeTracker = new PupilGazeTracker((float)CMSConstants.SCREEN_WIDTH, (float)CMSConstants.SCREEN_HEIGHT);
             currentCell = new Point(-1, -1);
         }
 
@@ -479,7 +479,7 @@ namespace MAGICGazeTrackingSuite
 
         private PointF ProcessGaze(PointF cursor)
         {
-            PointF gaze = gazeTracker.GazeOnScreen((float)screenWidth, (float)screenHeight);
+            PointF gaze = gazeTracker.CurrentGaze();
             if (gaze.X < 0 || gaze.Y < 0)
             {
                 return cursor;
@@ -496,7 +496,7 @@ namespace MAGICGazeTrackingSuite
 
         public override void Clean()
         {
-            gazeTracker.stop();
+            gazeTracker.Stop();
             firstFrameInControl = true;
 
             if( eastExcludeForm != null )

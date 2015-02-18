@@ -36,17 +36,32 @@
     <Reference Include="Castle.Zmq">
       <HintPath>..\packages\Castle.Zmq.4.0.1\lib\net40\Castle.Zmq.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\lib\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="TETControls">
+      <HintPath>..\lib\TETControls.dll</HintPath>
+    </Reference>
+    <Reference Include="TETCSharpClient">
+      <HintPath>..\lib\TETCSharpClient.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EyeTribeGazeTracker.cs" />
+    <Compile Include="IGazeTracker.cs" />
     <Compile Include="PointFHelper.cs" />
     <Compile Include="GazeData.cs" />
     <Compile Include="CMSLogMAGICGazeTrackingEvent.cs" />
@@ -58,7 +73,7 @@
       <DependentUpon>MAGICGazeMouseControlPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="MAGICGazeMouseControlModule.cs" />
-    <Compile Include="MAGICGazeTracker.cs" />
+    <Compile Include="PupilGazeTracker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

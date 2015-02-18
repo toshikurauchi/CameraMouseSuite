@@ -523,6 +523,8 @@ copy $(SolutionDir)lib\cvcam100.dll .
 copy $(SolutionDir)lib\cxcore100.dll .
 copy $(SolutionDir)lib\highgui100.dll .
 copy $(SolutionDir)lib\libguide40.dll .
-copy $(SolutionDir)lib\libzmq.dll .</PostBuildEvent>
+copy $(SolutionDir)lib\libzmq.dll .
+copy $(SolutionDir)lib\Newtonsoft.Json.dll .
+copy $(SolutionDir)lib\TETCSharpClient.dll .</PostBuildEvent>
   </PropertyGroup>
 </Project>

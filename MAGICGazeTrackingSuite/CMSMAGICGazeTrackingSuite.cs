@@ -26,7 +26,7 @@ namespace MAGICGazeTrackingSuite
     public class CMSMAGICGazeTrackingSuite : CMSTrackingSuite
     {
         private const string SuiteName         = "CMSMAGICGazeTrackingSuite";
-        private const string SuiteInformalName = "MAGIC Gaze (Advanced)";
+        private const string SuiteInformalName = "MAGIC Gaze";
         private const string SuiteDescription  = "Uses eye gaze to move cursor to currently gazed region and then cascades to traditional Camera Mouse tracker.";
 
         public CMSClickControlModuleStandard StandardClickControl
