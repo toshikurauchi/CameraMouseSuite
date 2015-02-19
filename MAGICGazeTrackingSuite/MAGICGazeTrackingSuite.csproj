@@ -94,6 +94,7 @@
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
     <None Include="packages.config" />
+    <None Include="Properties\DataSources\MAGICGazeMouseControlPanel.datasource" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

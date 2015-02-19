@@ -22,6 +22,7 @@ using System.Text;
 using CameraMouseSuite;
 using System.Drawing;
 using System.Diagnostics;
+using System.Xml.Serialization;
 
 namespace MAGICGazeTrackingSuite
 {
@@ -51,15 +52,44 @@ namespace MAGICGazeTrackingSuite
         private double northLimit = 0.0;
         private bool showPanel = true;
 
-        private IGazeTracker gazeTracker;
+        private int selectedGazeTrackerId;
+        private IGazeTracker selectedGazeTracker;
+        private List<IGazeTracker> gazeTrackers = new List<IGazeTracker>();
         private Point currentCell;
         private static int hCell = 9;
         private static int vCell = 5;
 
         public MAGICGazeMouseControlModule()
         {
-            this.gazeTracker = new PupilGazeTracker((float)CMSConstants.SCREEN_WIDTH, (float)CMSConstants.SCREEN_HEIGHT);
+            this.gazeTrackers.Add(new PupilGazeTracker((float)CMSConstants.SCREEN_WIDTH, (float)CMSConstants.SCREEN_HEIGHT));
+            this.gazeTrackers.Add(new EyeTribeGazeTracker());
+            this.selectedGazeTracker = this.gazeTrackers.First();
+            this.selectedGazeTrackerId = 0;
             currentCell = new Point(-1, -1);
+        }
+
+        [XmlIgnore()]
+        public List<IGazeTracker> GazeTrackers
+        {
+            get { return gazeTrackers; }
+        }
+
+        public int SelectedGazeTrackerId
+        {
+            get 
+            { 
+                return selectedGazeTrackerId; 
+            }
+            set {
+                selectedGazeTracker = gazeTrackers[value];
+                selectedGazeTrackerId = value;
+            }
+        }
+
+        [XmlIgnore()]
+        public IGazeTracker SelectedGazeTracker
+        {
+            get { return selectedGazeTracker; }
         }
 
         public bool ShowPanel
@@ -392,11 +422,11 @@ namespace MAGICGazeTrackingSuite
             PointF newGazeCursor = newCursor;
             if (PointFHelper.NormSqr(cursorDirection) >= 25) // 5 pixels TODO: this shouldn't be fixed like this
             {
-                gazeTracker.Active = false;
+                selectedGazeTracker.Active = false;
             }
             else
             {
-                gazeTracker.Active = true;
+                selectedGazeTracker.Active = true;
                 PointF gazeCursor = ProcessGaze(newCursor);
                 if (PointFHelper.NormSqr(PointFHelper.Subtract(newCursor, gazeCursor)) > 1e-6)
                 {
@@ -479,7 +509,7 @@ namespace MAGICGazeTrackingSuite
 
         private PointF ProcessGaze(PointF cursor)
         {
-            PointF gaze = gazeTracker.CurrentGaze();
+            PointF gaze = selectedGazeTracker.CurrentGaze();
             if (gaze.X < 0 || gaze.Y < 0)
             {
                 return cursor;
@@ -496,7 +526,7 @@ namespace MAGICGazeTrackingSuite
 
         public override void Clean()
         {
-            gazeTracker.Stop();
+            selectedGazeTracker.Stop();
             firstFrameInControl = true;
 
             if( eastExcludeForm != null )

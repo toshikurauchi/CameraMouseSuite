@@ -43,6 +43,17 @@ namespace MAGICGazeTrackingSuite
 
         private bool loadingControls = false;
 
+        private void eyeTracker_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void startEyeTracker_Click(object sender, EventArgs e)
+        {
+            this.magicGazeMouseControlModule.SelectedGazeTracker.Start();
+            startEyeTracker.Enabled = false;
+        }
+
         private void Horiz_gain_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (!this.loadingControls)
@@ -225,6 +236,9 @@ namespace MAGICGazeTrackingSuite
         public void LoadFromControls()
         {
             loadingControls = true;
+
+            eyeTracker.DataSource = magicGazeMouseControlModule.GazeTrackers;
+            eyeTracker.DisplayMember = "Name";
 
             moveMouseCheckBox.Checked = magicGazeMouseControlModule.MoveMouse;
             useGridCheckBox.Checked = magicGazeMouseControlModule.UseGrid;

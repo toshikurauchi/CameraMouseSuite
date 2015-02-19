@@ -34,14 +34,19 @@ namespace MAGICGazeTrackingSuite
         private ArrayList latestData;
         private static int FILTER_TIME_WINDOW = 100; // In milliseconds
         private bool active = true;
+        private bool started = false;
         private float screenWidth = 0;
         private float screenHeight = 0;
 
         public PupilGazeTracker(float screenWidth, float screenHeight)
         {
-            latestData = ArrayList.Synchronized(new ArrayList());
             this.screenWidth = screenWidth;
             this.screenHeight = screenHeight;
+        }
+
+        public string Name
+        {
+            get { return "Pupil-Labs"; }
         }
 
         public bool Active
@@ -52,6 +57,10 @@ namespace MAGICGazeTrackingSuite
 
         public PointF CurrentGaze()
         {
+            if (!started)
+            {
+                return new PointF(-1, -1);
+            }
             if (clientThread == null)
             {
                 stopEvent = new ManualResetEvent(false);
@@ -134,8 +143,20 @@ namespace MAGICGazeTrackingSuite
             }
         }
 
+        public void Start()
+        {
+            latestData = ArrayList.Synchronized(new ArrayList());
+            Active = true;
+            started = true;
+        }
+
+        public void Calibrate()
+        {
+        }
+
         public void Stop()
         {
+            started = false;
             if (clientThread != null)
             {
                 stopEvent.Set();

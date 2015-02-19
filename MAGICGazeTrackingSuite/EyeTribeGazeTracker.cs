@@ -11,20 +11,16 @@ namespace MAGICGazeTrackingSuite
     public class EyeTribeGazeTracker : IGazeTracker, IGazeListener
     {
         private bool active = true;
+        private bool started = false;
         private PointF gaze = new PointF(-1, -1);
 
         public EyeTribeGazeTracker()
         {
-            // Connect client
-            GazeManager.Instance.Activate(GazeManager.ApiVersion.VERSION_1_0, GazeManager.ClientMode.Push);
-            GazeManager.Instance.AddGazeListener(this);
         }
 
-        public void Calibrate()
+        public string Name
         {
-            CalibrationRunner calRunner = new CalibrationRunner();
-            calRunner.OnResult += onCalibrationResult;
-            calRunner.Start();
+            get { return "TheEyeTribe"; }
         }
 
         public bool Active
@@ -50,14 +46,36 @@ namespace MAGICGazeTrackingSuite
             }
         }
 
+        public void Start()
+        {
+            GazeManager.Instance.Activate(GazeManager.ApiVersion.VERSION_1_0, GazeManager.ClientMode.Push);
+            if (!GazeManager.Instance.IsCalibrated)
+            {
+                Calibrate();
+            }
+            Active = true;
+            started = true;
+        }
+
         public void Stop()
         {
+            started = false;
             GazeManager.Instance.Deactivate();
+        }
+
+        public void Calibrate()
+        {
+            CalibrationRunner calRunner = new CalibrationRunner();
+            calRunner.OnResult += onCalibrationResult;
+            calRunner.Start();
         }
 
         private void onCalibrationResult(object sender, CalibrationRunnerEventArgs e)
         {
-            // May do something here in the future
+            if (e.Result == CalibrationRunnerResult.Success && !GazeManager.Instance.HasGazeListener(this))
+            {
+                GazeManager.Instance.AddGazeListener(this);
+            }
         }
     }
 }

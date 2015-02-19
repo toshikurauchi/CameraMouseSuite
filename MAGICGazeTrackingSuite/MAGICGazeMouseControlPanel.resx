@@ -125,7 +125,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACe
-        cAAAAk1TRnQBSQFMAgEBBwEAASwBAAEsAQABIAEAASABAAT/AREBAAj/AUIBTQE2BwABNgMAASgDAAGA
+        cAAAAk1TRnQBSQFMAgEBBwEAAUwBAAFMAQABIAEAASABAAT/AREBAAj/AUIBTQE2BwABNgMAASgDAAGA
         AwABQAMAAQEBAAEQBgABQBIAAZoBcwGaAXMBmgFzAZoBcwGaAXMBmgFzAZoBcwGaAXMBmgFzAZoBcwGa
         AXMBmgFzAZoBcwGaAXMBmgFzAZoBcwGaAXMBmgFzAZoBcwGaAXMBmgFzAZoBcwGaAXMBmgFzAZoBcwGa
         AXMBmgFzAZoBcwGaAXMBmgFzAZoBcwGaAXMBuwF3AbsBdwG7AXcBuwF3AbsBdwG7AXcBuwF3AbsBdwG7
@@ -797,4 +797,7 @@
         kKmtkKmtkKmtkKmtkKmtAAAA
 </value>
   </data>
+  <metadata name="mAGICGazeMouseControlPanelBindingSource.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>122, 17</value>
+  </metadata>
 </root>
