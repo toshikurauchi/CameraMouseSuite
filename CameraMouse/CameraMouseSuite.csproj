@@ -525,6 +525,7 @@ copy $(SolutionDir)lib\highgui100.dll .
 copy $(SolutionDir)lib\libguide40.dll .
 copy $(SolutionDir)lib\libzmq.dll .
 copy $(SolutionDir)lib\Newtonsoft.Json.dll .
-copy $(SolutionDir)lib\TETCSharpClient.dll .</PostBuildEvent>
+copy $(SolutionDir)lib\TETCSharpClient.dll .
+copy $(SolutionDir)lib\TETControls.dll .</PostBuildEvent>
   </PropertyGroup>
 </Project>

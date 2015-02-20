@@ -45,7 +45,8 @@ namespace MAGICGazeTrackingSuite
 
         private void eyeTracker_SelectedIndexChanged(object sender, EventArgs e)
         {
-
+            ComboBox comboBox = (ComboBox) sender;
+            this.magicGazeMouseControlModule.SelectedGazeTrackerId = comboBox.SelectedIndex;
         }
 
         private void startEyeTracker_Click(object sender, EventArgs e)

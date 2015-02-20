@@ -175,6 +175,7 @@ namespace CameraMouseSuite
             
         }
 
+        [STAThread]
         public static void Main(String[] args)
         {
             ProcessCommandLineArguments(args);
