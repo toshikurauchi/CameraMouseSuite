@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Windows.Controls;
 
 namespace MAGICGazeTrackingSuite
 {
@@ -9,6 +10,8 @@ namespace MAGICGazeTrackingSuite
         string Name { get; }
         PointF CurrentGaze();
         void Start();
+        bool Started { get; }
+        UserControl EyeStatus { get; }
         void Calibrate();
         void Stop();
     }

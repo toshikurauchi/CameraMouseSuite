@@ -21,6 +21,7 @@ using System.Threading;
 using System.Drawing;
 using System.Collections;
 using Castle.Zmq;
+using System.Windows.Controls;
 
 namespace MAGICGazeTrackingSuite
 {
@@ -150,6 +151,11 @@ namespace MAGICGazeTrackingSuite
             started = true;
         }
 
+        public bool Started
+        {
+            get { return started; }
+        }
+
         public void Calibrate()
         {
         }
@@ -165,6 +171,11 @@ namespace MAGICGazeTrackingSuite
                 clientThread = null;
                 stopEvent = null;
             }
+        }
+
+        public UserControl EyeStatus
+        { 
+            get { return null; } 
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿namespace MAGICGazeTrackingSuite
+﻿using System.Windows.Forms.Integration;
+namespace MAGICGazeTrackingSuite
 {
     partial class MAGICGazeMouseControlPanel
     {
@@ -41,6 +42,8 @@
             this.smooth = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.eyeStatusHost = new System.Windows.Forms.Integration.ElementHost();
+            this.calibrateEyeTracker = new System.Windows.Forms.Button();
             this.label9 = new System.Windows.Forms.Label();
             this.eyeTracker = new System.Windows.Forms.ComboBox();
             this.useGridCheckBox = new System.Windows.Forms.CheckBox();
@@ -53,7 +56,6 @@
             this.exclude_W = new System.Windows.Forms.ComboBox();
             this.label5 = new System.Windows.Forms.Label();
             this.mAGICGazeMouseControlPanelBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.startEyeTracker = new System.Windows.Forms.Button();
             this.groupBox7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mAGICGazeMouseControlPanelBindingSource)).BeginInit();
             this.SuspendLayout();
@@ -181,7 +183,8 @@
             // 
             // groupBox7
             // 
-            this.groupBox7.Controls.Add(this.startEyeTracker);
+            this.groupBox7.Controls.Add(this.eyeStatusHost);
+            this.groupBox7.Controls.Add(this.calibrateEyeTracker);
             this.groupBox7.Controls.Add(this.label9);
             this.groupBox7.Controls.Add(this.eyeTracker);
             this.groupBox7.Controls.Add(this.useGridCheckBox);
@@ -204,9 +207,28 @@
             this.groupBox7.Controls.Add(this.Horiz_gain);
             this.groupBox7.Location = new System.Drawing.Point(7, 2);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(650, 180);
+            this.groupBox7.Size = new System.Drawing.Size(650, 294);
             this.groupBox7.TabIndex = 10;
             this.groupBox7.TabStop = false;
+            // 
+            // eyeStatusHost
+            // 
+            this.eyeStatusHost.Location = new System.Drawing.Point(327, 13);
+            this.eyeStatusHost.Name = "eyeStatusHost";
+            this.eyeStatusHost.Size = new System.Drawing.Size(317, 263);
+            this.eyeStatusHost.TabIndex = 11;
+            this.eyeStatusHost.Text = "eyeStatusHost";
+            this.eyeStatusHost.Child = null;
+            // 
+            // calibrateEyeTracker
+            // 
+            this.calibrateEyeTracker.Location = new System.Drawing.Point(204, 11);
+            this.calibrateEyeTracker.Name = "calibrateEyeTracker";
+            this.calibrateEyeTracker.Size = new System.Drawing.Size(75, 23);
+            this.calibrateEyeTracker.TabIndex = 10;
+            this.calibrateEyeTracker.Text = "Calibrate";
+            this.calibrateEyeTracker.UseVisualStyleBackColor = true;
+            this.calibrateEyeTracker.Click += new System.EventHandler(this.calibrateEyeTracker_Click);
             // 
             // label9
             // 
@@ -304,7 +326,7 @@
             "38%",
             "39%",
             "40%"});
-            this.exclude_S.Location = new System.Drawing.Point(515, 122);
+            this.exclude_S.Location = new System.Drawing.Point(151, 235);
             this.exclude_S.Name = "exclude_S";
             this.exclude_S.Size = new System.Drawing.Size(56, 21);
             this.exclude_S.TabIndex = 4;
@@ -356,7 +378,7 @@
             "38%",
             "39%",
             "40%"});
-            this.exclude_E.Location = new System.Drawing.Point(579, 106);
+            this.exclude_E.Location = new System.Drawing.Point(215, 219);
             this.exclude_E.Name = "exclude_E";
             this.exclude_E.Size = new System.Drawing.Size(56, 21);
             this.exclude_E.TabIndex = 3;
@@ -417,7 +439,7 @@
             "38%",
             "39%",
             "40%"});
-            this.exclude_N.Location = new System.Drawing.Point(515, 90);
+            this.exclude_N.Location = new System.Drawing.Point(151, 203);
             this.exclude_N.Name = "exclude_N";
             this.exclude_N.Size = new System.Drawing.Size(56, 21);
             this.exclude_N.TabIndex = 2;
@@ -469,7 +491,7 @@
             "38%",
             "39%",
             "40%"});
-            this.exclude_W.Location = new System.Drawing.Point(451, 106);
+            this.exclude_W.Location = new System.Drawing.Point(87, 219);
             this.exclude_W.Name = "exclude_W";
             this.exclude_W.Size = new System.Drawing.Size(56, 21);
             this.exclude_W.TabIndex = 1;
@@ -478,7 +500,7 @@
             // label5
             // 
             this.label5.Image = ((System.Drawing.Image)(resources.GetObject("label5.Image")));
-            this.label5.Location = new System.Drawing.Point(376, 90);
+            this.label5.Location = new System.Drawing.Point(12, 203);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(64, 48);
             this.label5.TabIndex = 0;
@@ -487,23 +509,13 @@
             // 
             this.mAGICGazeMouseControlPanelBindingSource.DataSource = typeof(MAGICGazeTrackingSuite.MAGICGazeMouseControlPanel);
             // 
-            // startEyeTracker
-            // 
-            this.startEyeTracker.Location = new System.Drawing.Point(204, 11);
-            this.startEyeTracker.Name = "startEyeTracker";
-            this.startEyeTracker.Size = new System.Drawing.Size(75, 23);
-            this.startEyeTracker.TabIndex = 10;
-            this.startEyeTracker.Text = "Start";
-            this.startEyeTracker.UseVisualStyleBackColor = true;
-            this.startEyeTracker.Click += new System.EventHandler(this.startEyeTracker_Click);
-            // 
             // MAGICGazeMouseControlPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.groupBox7);
             this.Name = "MAGICGazeMouseControlPanel";
-            this.Size = new System.Drawing.Size(665, 187);
+            this.Size = new System.Drawing.Size(665, 304);
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mAGICGazeMouseControlPanelBindingSource)).EndInit();
@@ -536,7 +548,8 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.ComboBox eyeTracker;
         private System.Windows.Forms.BindingSource mAGICGazeMouseControlPanelBindingSource;
-        private System.Windows.Forms.Button startEyeTracker;
+        private System.Windows.Forms.Button calibrateEyeTracker;
+        private ElementHost eyeStatusHost;
 
     }
 }

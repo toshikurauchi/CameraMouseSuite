@@ -58,8 +58,12 @@
       <HintPath>..\lib\TETCSharpClient.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EyeStatusControl.xaml.cs">
+      <DependentUpon>EyeStatusControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EyeTribeGazeTracker.cs" />
     <Compile Include="IGazeTracker.cs" />
     <Compile Include="PointFHelper.cs" />
@@ -95,6 +99,12 @@
     <None Include="ClassDiagram1.cd" />
     <None Include="packages.config" />
     <None Include="Properties\DataSources\MAGICGazeMouseControlPanel.datasource" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="EyeStatusControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

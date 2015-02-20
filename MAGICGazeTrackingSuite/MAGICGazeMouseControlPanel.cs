@@ -46,13 +46,18 @@ namespace MAGICGazeTrackingSuite
         private void eyeTracker_SelectedIndexChanged(object sender, EventArgs e)
         {
             ComboBox comboBox = (ComboBox) sender;
+            if (this.magicGazeMouseControlModule.SelectedGazeTracker.Started)
+            {
+                this.magicGazeMouseControlModule.SelectedGazeTracker.Stop();
+            }
             this.magicGazeMouseControlModule.SelectedGazeTrackerId = comboBox.SelectedIndex;
+            this.magicGazeMouseControlModule.SelectedGazeTracker.Start();
+            this.eyeStatusHost.Child = this.magicGazeMouseControlModule.SelectedGazeTracker.EyeStatus;
         }
 
-        private void startEyeTracker_Click(object sender, EventArgs e)
+        private void calibrateEyeTracker_Click(object sender, EventArgs e)
         {
-            this.magicGazeMouseControlModule.SelectedGazeTracker.Start();
-            startEyeTracker.Enabled = false;
+            this.magicGazeMouseControlModule.SelectedGazeTracker.Calibrate();
         }
 
         private void Horiz_gain_SelectedIndexChanged(object sender, EventArgs e)

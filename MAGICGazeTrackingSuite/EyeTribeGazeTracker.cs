@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using TETControls.Calibration;
 using TETCSharpClient;
 
@@ -50,12 +51,13 @@ namespace MAGICGazeTrackingSuite
         public void Start()
         {
             GazeManager.Instance.Activate(GazeManager.ApiVersion.VERSION_1_0, GazeManager.ClientMode.Push);
-            if (!GazeManager.Instance.IsCalibrated)
-            {
-                Calibrate();
-            }
             Active = true;
             started = true;
+        }
+
+        public bool Started
+        {
+            get { return started; }
         }
 
         public void Stop()
@@ -77,6 +79,11 @@ namespace MAGICGazeTrackingSuite
             {
                 GazeManager.Instance.AddGazeListener(this);
             }
+        }
+
+        public UserControl EyeStatus
+        {
+            get { return new EyeStatusControl(); }
         }
     }
 }
