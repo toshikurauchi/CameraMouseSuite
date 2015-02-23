@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,9 @@ namespace MAGICGazeTrackingSuite
     {
         private bool active = true;
         private bool started = false;
-        private PointF gaze = new PointF(-1, -1);
+        private PointF gaze = PointF.Empty;
+        private List<TETCSharpClient.Data.GazeData> previousData;
+        private long timeWindowDur = 500;
 
         public EyeTribeGazeTracker()
         {
@@ -38,19 +41,17 @@ namespace MAGICGazeTrackingSuite
 
         public void OnGazeUpdate(TETCSharpClient.Data.GazeData gazeData)
         {
-            if (gazeData.hasRawGazeCoordinates())
-            {
-                gaze = new PointF((float) gazeData.SmoothedCoordinates.X, (float) gazeData.SmoothedCoordinates.Y);
-            }
-            else
-            {
-                gaze = new PointF((float) gazeData.RawCoordinates.X, (float) gazeData.RawCoordinates.Y);
-            }
+            previousData.RemoveAll(data => gazeData.TimeStamp - data.TimeStamp > timeWindowDur);
+            previousData.Add(gazeData);
+            double x = previousData.Median(data => data.RawCoordinates.X);
+            double y = previousData.Median(data => data.RawCoordinates.Y);
+            gaze = new PointF((float) x, (float) y);
         }
 
         public void Start()
         {
             GazeManager.Instance.Activate(GazeManager.ApiVersion.VERSION_1_0, GazeManager.ClientMode.Push);
+            previousData = new List<TETCSharpClient.Data.GazeData>();
             Active = true;
             started = true;
         }

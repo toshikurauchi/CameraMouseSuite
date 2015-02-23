@@ -66,7 +66,8 @@
     </Compile>
     <Compile Include="EyeTribeGazeTracker.cs" />
     <Compile Include="IGazeTracker.cs" />
-    <Compile Include="PointFHelper.cs" />
+    <Compile Include="ListExtension.cs" />
+    <Compile Include="PointFExtension.cs" />
     <Compile Include="GazeData.cs" />
     <Compile Include="CMSLogMAGICGazeTrackingEvent.cs" />
     <Compile Include="CMSMAGICGazeTrackingSuite.cs" />

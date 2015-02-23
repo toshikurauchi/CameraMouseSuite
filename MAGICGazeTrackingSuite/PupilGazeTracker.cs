@@ -60,7 +60,7 @@ namespace MAGICGazeTrackingSuite
         {
             if (!started)
             {
-                return new PointF(-1, -1);
+                return PointF.Empty;
             }
             if (clientThread == null)
             {
@@ -72,11 +72,11 @@ namespace MAGICGazeTrackingSuite
 
             UpdateLatestData();
             PointF gaze = MedianFilteredGazeData();
-            if ((gaze.X == -1 && gaze.Y == -1) || !active)
+            if (gaze.IsEmpty)
             {
-                return new PointF(-1, -1);
+                return PointF.Empty;
             }
-            gaze = PointFHelper.Multiply(gaze, screenWidth, screenHeight);
+            gaze = PointFExtension.Multiply(gaze, screenWidth, screenHeight);
             gaze.Y = screenHeight - gaze.Y; // Adjusting coordinate system
             return gaze;
         }
@@ -94,7 +94,7 @@ namespace MAGICGazeTrackingSuite
             yValues.Sort();
             if (xValues.Count == 0 || yValues.Count == 0)
             {
-                return new PointF(-1, -1);
+                return PointF.Empty;
             }
             return new PointF((float)xValues[xValues.Count / 2], (float)yValues[yValues.Count / 2]);
         }
@@ -131,7 +131,7 @@ namespace MAGICGazeTrackingSuite
                     if (reply != null)
                     {
                         string msg = Encoding.ASCII.GetString(reply);
-                        if (msg.StartsWith("Pupil") && active)
+                        if (msg.StartsWith("Pupil"))
                         {
                             latestData.Add(new GazeData(msg));
                         }
