@@ -45,10 +45,20 @@ namespace MAGICGazeTrackingSuite
         public void OnGazeUpdate(TETCSharpClient.Data.GazeData gazeData)
         {
             previousData.RemoveAll(data => gazeData.TimeStamp - data.TimeStamp > timeWindowDur);
-            previousData.Add(gazeData);
-            double x = previousData.Median(data => data.RawCoordinates.X);
-            double y = previousData.Median(data => data.RawCoordinates.Y);
-            gaze = new PointF((float) x, (float) y);
+            if ((gazeData.State & TETCSharpClient.Data.GazeData.STATE_TRACKING_GAZE) != 0)
+            {
+                previousData.Add(gazeData);
+            }
+            if (previousData.Count == 0)
+            {
+                gaze = PointF.Empty;
+            }
+            else
+            {
+                double x = previousData.Median(data => data.RawCoordinates.X);
+                double y = previousData.Median(data => data.RawCoordinates.Y);
+                gaze = new PointF((float) x, (float) y);
+            }
         }
 
         public void Start()

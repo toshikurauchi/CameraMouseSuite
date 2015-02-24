@@ -450,7 +450,7 @@ namespace MAGICGazeTrackingSuite
                 PointF outerTopLeft = newGazeCursor.Subtract(outerHalfBox);
                 PointF outerBotRight = newGazeCursor.Add(outerHalfBox);
                 PointF gazeCursorDrct = newGazeCursor.Subtract(prevCursorPos);
-                if (gazeCursorDrct.Angle(newHeadCursor.Subtract(prevCursorPos)) < 90 && !Geometry.PointInBox(newHeadCursor, outerTopLeft, outerBotRight))
+                if (!newGazeCursor.IsEmpty && gazeCursorDrct.Angle(newHeadCursor.Subtract(prevCursorPos)) < 90 && !Geometry.PointInBox(newHeadCursor, outerTopLeft, outerBotRight))
                 {
                     float innerLength = (float) (0.2*screenWidth);
                     PointF innerHalfBox = new PointF(innerLength / 2, innerLength / 2);
