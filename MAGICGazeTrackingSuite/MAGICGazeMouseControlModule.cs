@@ -57,7 +57,7 @@ namespace MAGICGazeTrackingSuite
         private IGazeTracker selectedGazeTracker;
         private List<IGazeTracker> gazeTrackers = new List<IGazeTracker>();
         private bool usingHead = false;
-        private double headThresh = 0.01; // TODO: this shouldn't be fixed like this
+        private double headThresh = 0.005; // TODO: this shouldn't be fixed like this
         private double gazeThresh = 0.125; // TODO: this shouldn't be fixed like this
         private double gazeCursorThresh = 0.1; // TODO: this shouldn't be fixed like this
         private Point currentCell;
@@ -441,19 +441,21 @@ namespace MAGICGazeTrackingSuite
             double gThreshSq = gazeThresh * gazeThresh * screenWidth * screenWidth;
             double gCurThreshSq = gazeCursorThresh * gazeCursorThresh * screenWidth * screenWidth;
 
-            PointF newCursor = prevCursorPos;
+            PointF newCursor = newHeadCursor;
             if (newHeadCursor.DistSqr(prevCursorPos) >= hThreshSq)
             {
                 //usingHead = true;
                 float outerLength = (float) (0.2*screenWidth);
                 PointF outerHalfBox = new PointF(outerLength / 2, outerLength / 2);
-                if (newGazeCursor.Subtract(prevCursorPos).Angle(newHeadCursor.Subtract(prevCursorPos)) < 90 && !newHeadCursor.InBox(newGazeCursor.Subtract(outerHalfBox), newGazeCursor.Add(outerHalfBox)))
+                PointF outerTopLeft = newGazeCursor.Subtract(outerHalfBox);
+                PointF outerBotRight = newGazeCursor.Add(outerHalfBox);
+                PointF gazeCursorDrct = newGazeCursor.Subtract(prevCursorPos);
+                if (gazeCursorDrct.Angle(newHeadCursor.Subtract(prevCursorPos)) < 90 && !newHeadCursor.InBox(outerTopLeft, outerBotRight))
                 {
                     float innerLength = (float) (0.125*screenWidth);
                     PointF innerHalfBox = new PointF(innerLength / 2, innerLength / 2);
                     PointF innerTopLeft = newGazeCursor.Subtract(innerHalfBox);
                     PointF innerBotRight = newGazeCursor.Add(innerHalfBox);
-                    PointF gazeCursorDrct = newGazeCursor.Subtract(prevCursorPos);
                     List<PointF> boxIntersections = new List<PointF>();
                     boxIntersections.Add(gazeCursorDrct.IntersectLine(innerTopLeft.HorizontalLine()));
                     boxIntersections.Add(gazeCursorDrct.IntersectLine(innerTopLeft.VerticalLine()));
@@ -462,10 +464,6 @@ namespace MAGICGazeTrackingSuite
                     newCursor = boxIntersections.Argmin(p => p.DistSqr(prevCursorPos));
                     screenOriginPoint = newGazeCursor;
                     imageOriginPoint = new PointF(imagePoint.X, imagePoint.Y);
-                }
-                else
-                {
-                    newCursor = newHeadCursor;
                 }
             }
             /*else if (newGazeCursor.DistSqr(prevGazePos) >= gThreshSq)
