@@ -32,5 +32,13 @@ namespace MAGICGazeTrackingSuite
                 return selector(temp[count / 2]);
             }
         }
+        public static TSource Argmin<TSource>(this IEnumerable<TSource> source, Func<TSource, double> selector)
+        {
+            if (source.Count() == 0)
+            {
+                throw new InvalidOperationException("Empty collection");
+            }
+            return source.Aggregate((curmin, x) => (curmin == null || selector(x) < selector(curmin) ? x : curmin));
+        }
     }
 }

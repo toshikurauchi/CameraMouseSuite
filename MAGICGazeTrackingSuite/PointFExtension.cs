@@ -5,7 +5,7 @@ namespace MAGICGazeTrackingSuite
 {
     public static class PointFExtension
     {
-        public static PointF Sum(this PointF p1, PointF p2)
+        public static PointF Add(this PointF p1, PointF p2)
         {
             return new PointF(p1.X + p2.X, p1.Y + p2.Y);
         }
@@ -56,19 +56,49 @@ namespace MAGICGazeTrackingSuite
             p.Y = p.Y / normP;
             return p;
         }
-        private static PointF LineFromPts(this PointF p1, PointF p2) // y = ax + b. Returns (a,b)
+        public static PointF LineTo(this PointF p1, PointF p2) // y = ax + b. Returns (a,b)
         {
             float a = (p2.Y-p1.Y)/(p2.X-p1.X);
             return new PointF(a, p1.Y - a * p1.X);
         }
+        public static PointF HorizontalLine(this PointF p)
+        {
+            return p.LineTo(p.Add(new Point(1,0)));
+        }
+        public static PointF IntersectLine(this PointF line1, PointF line2)
+        {
+            if (line1.X - line2.X == 0) // Parallel
+            {
+                return PointF.Empty;
+            }
+            float x = (line2.Y - line1.Y) / (line1.X - line2.X);
+            float y = line1.X * x + line1.Y;
+            return new PointF(x, y);
+        }
+        public static PointF VerticalLine(this PointF p)
+        {
+            return p.LineTo(p.Add(new Point(0,1)));
+        }
+        public static float Angle(this PointF v1, PointF v2)
+        {
+            return (float) (Math.Acos(v1.Normalize().Dot(v2.Normalize())) * 180 / Math.PI);
+        }
         public static PointF ClosestPointInLine(this PointF p, PointF l1, PointF l2)
         {
-            PointF line = LineFromPts(l1, l2);
+            PointF line = l1.LineTo(l2);
             float a = line.X;
             float b = -1;
             float c = line.Y;
             float div = a * a + b * b;
             return new PointF((b*(b*p.X-a*p.Y)-a*c)/div, (a*(-b*p.X + a*p.Y)-b*c)/div);
+        }
+        public static bool InBox(this PointF p, PointF topLeft, PointF botRight)
+        {
+            double minX = topLeft.X;
+            double maxX = botRight.X;
+            double minY = topLeft.Y;
+            double maxY = botRight.Y;
+            return minX <= p.X && maxX >= p.X && minY <= p.Y && maxY >= p.Y;
         }
         public static PointF IntersectLineAndCircle(this PointF startP, PointF endP, PointF center, float rad)
         {
@@ -94,9 +124,9 @@ namespace MAGICGazeTrackingSuite
             }
             if (t1 < 0)
             {
-                return Sum(startP, Multiply(d, t2));
+                return Add(startP, Multiply(d, t2));
             }
-            return Sum(startP, Multiply(d, t1));
+            return Add(startP, Multiply(d, t1));
         }
         public static PointF ClosestPointToRayInCircle(this PointF center, float radius, PointF rayStart, PointF otherPointInRay)
         {
