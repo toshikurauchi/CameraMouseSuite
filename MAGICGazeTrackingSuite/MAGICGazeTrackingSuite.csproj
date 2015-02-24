@@ -65,8 +65,10 @@
       <DependentUpon>EyeStatusControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="EyeTribeGazeTracker.cs" />
+    <Compile Include="Geometry.cs" />
     <Compile Include="ICalibrationStatusListener.cs" />
     <Compile Include="IGazeTracker.cs" />
+    <Compile Include="Line2D.cs" />
     <Compile Include="ListExtension.cs" />
     <Compile Include="PointFExtension.cs" />
     <Compile Include="GazeData.cs" />

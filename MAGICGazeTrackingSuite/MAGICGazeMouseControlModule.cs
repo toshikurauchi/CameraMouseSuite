@@ -450,18 +450,27 @@ namespace MAGICGazeTrackingSuite
                 PointF outerTopLeft = newGazeCursor.Subtract(outerHalfBox);
                 PointF outerBotRight = newGazeCursor.Add(outerHalfBox);
                 PointF gazeCursorDrct = newGazeCursor.Subtract(prevCursorPos);
-                if (gazeCursorDrct.Angle(newHeadCursor.Subtract(prevCursorPos)) < 90 && !newHeadCursor.InBox(outerTopLeft, outerBotRight))
+                if (gazeCursorDrct.Angle(newHeadCursor.Subtract(prevCursorPos)) < 90 && !Geometry.PointInBox(newHeadCursor, outerTopLeft, outerBotRight))
                 {
-                    float innerLength = (float) (0.125*screenWidth);
+                    float innerLength = (float) (0.2*screenWidth);
                     PointF innerHalfBox = new PointF(innerLength / 2, innerLength / 2);
                     PointF innerTopLeft = newGazeCursor.Subtract(innerHalfBox);
                     PointF innerBotRight = newGazeCursor.Add(innerHalfBox);
                     List<PointF> boxIntersections = new List<PointF>();
-                    boxIntersections.Add(gazeCursorDrct.IntersectLine(innerTopLeft.HorizontalLine()));
-                    boxIntersections.Add(gazeCursorDrct.IntersectLine(innerTopLeft.VerticalLine()));
-                    boxIntersections.Add(gazeCursorDrct.IntersectLine(innerBotRight.HorizontalLine()));
-                    boxIntersections.Add(gazeCursorDrct.IntersectLine(innerBotRight.VerticalLine()));
+                    Line2D gazeCursorLine = new Line2D(newGazeCursor, prevCursorPos);
+                    boxIntersections.Add(gazeCursorLine.Intersect(Line2D.HorizontalLine(innerTopLeft)));
+                    boxIntersections.Add(gazeCursorLine.Intersect(Line2D.VerticalLine(innerTopLeft)));
+                    boxIntersections.Add(gazeCursorLine.Intersect(Line2D.HorizontalLine(innerBotRight)));
+                    boxIntersections.Add(gazeCursorLine.Intersect(Line2D.VerticalLine(innerBotRight)));
                     newCursor = boxIntersections.Argmin(p => p.DistSqr(prevCursorPos));
+                    Console.WriteLine("POINTS");
+                    Console.WriteLine(boxIntersections[0]);
+                    Console.WriteLine(boxIntersections[1]);
+                    Console.WriteLine(boxIntersections[2]);
+                    Console.WriteLine(boxIntersections[3]);
+                    Console.WriteLine(prevCursorPos);
+                    Console.WriteLine(newCursor);
+                    Console.WriteLine(newGazeCursor);
                     screenOriginPoint = newGazeCursor;
                     imageOriginPoint = new PointF(imagePoint.X, imagePoint.Y);
                 }
