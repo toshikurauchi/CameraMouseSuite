@@ -13,6 +13,8 @@ namespace MAGICGazeTrackingSuite
         bool Started { get; }
         UserControl EyeStatus { get; }
         void Calibrate();
+        void AddCalibrationStatusListener(ICalibrationStatusListener listener);
+        void RemoveCalibrationStatusListener(ICalibrationStatusListener listener);
         void Stop();
     }
 }

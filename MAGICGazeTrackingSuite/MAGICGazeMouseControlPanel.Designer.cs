@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms.Integration;
 namespace MAGICGazeTrackingSuite
 {
-    partial class MAGICGazeMouseControlPanel
+    partial class MAGICGazeMouseControlPanel : ICalibrationStatusListener
     {
         /// <summary> 
         /// Required designer variable.
@@ -56,6 +56,7 @@ namespace MAGICGazeTrackingSuite
             this.exclude_W = new System.Windows.Forms.ComboBox();
             this.label5 = new System.Windows.Forms.Label();
             this.mAGICGazeMouseControlPanelBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.calibrationStatus = new System.Windows.Forms.Label();
             this.groupBox7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mAGICGazeMouseControlPanelBindingSource)).BeginInit();
             this.SuspendLayout();
@@ -183,6 +184,7 @@ namespace MAGICGazeTrackingSuite
             // 
             // groupBox7
             // 
+            this.groupBox7.Controls.Add(this.calibrationStatus);
             this.groupBox7.Controls.Add(this.eyeStatusHost);
             this.groupBox7.Controls.Add(this.calibrateEyeTracker);
             this.groupBox7.Controls.Add(this.label9);
@@ -509,6 +511,15 @@ namespace MAGICGazeTrackingSuite
             // 
             this.mAGICGazeMouseControlPanelBindingSource.DataSource = typeof(MAGICGazeTrackingSuite.MAGICGazeMouseControlPanel);
             // 
+            // calibrationStatus
+            // 
+            this.calibrationStatus.AutoSize = true;
+            this.calibrationStatus.Location = new System.Drawing.Point(206, 41);
+            this.calibrationStatus.Name = "calibrationStatus";
+            this.calibrationStatus.Size = new System.Drawing.Size(73, 13);
+            this.calibrationStatus.TabIndex = 12;
+            this.calibrationStatus.Text = CalibrationStatus.NotCalibrated;
+            // 
             // MAGICGazeMouseControlPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -550,6 +561,12 @@ namespace MAGICGazeTrackingSuite
         private System.Windows.Forms.BindingSource mAGICGazeMouseControlPanelBindingSource;
         private System.Windows.Forms.Button calibrateEyeTracker;
         private ElementHost eyeStatusHost;
+        private System.Windows.Forms.Label calibrationStatus;
 
+
+        public void CalibrationStatusChanged(CalibrationStatus newStatus)
+        {
+            calibrationStatus.Text = newStatus;
+        }
     }
 }

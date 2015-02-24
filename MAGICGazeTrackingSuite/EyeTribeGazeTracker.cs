@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using TETControls.Calibration;
 using TETCSharpClient;
+using TETCSharpClient.Data;
 
 namespace MAGICGazeTrackingSuite
 {
@@ -18,6 +19,8 @@ namespace MAGICGazeTrackingSuite
         private PointF gaze = PointF.Empty;
         private List<TETCSharpClient.Data.GazeData> previousData;
         private long timeWindowDur = 500;
+        private HashSet<ICalibrationStatusListener> calibStatusListeners = new HashSet<ICalibrationStatusListener>();
+        private CalibrationStatus calibStatus = CalibrationStatus.NotCalibrated;
 
         public EyeTribeGazeTracker()
         {
@@ -74,11 +77,35 @@ namespace MAGICGazeTrackingSuite
             calRunner.Start();
         }
 
+        public void AddCalibrationStatusListener(ICalibrationStatusListener listener)
+        {
+            calibStatusListeners.Add(listener);
+            listener.CalibrationStatusChanged(calibStatus);
+        }
+
+        public void RemoveCalibrationStatusListener(ICalibrationStatusListener listener)
+        {
+            calibStatusListeners.Remove(listener);
+        }
+
         private void onCalibrationResult(object sender, CalibrationRunnerEventArgs e)
         {
-            if (e.Result == CalibrationRunnerResult.Success && !GazeManager.Instance.HasGazeListener(this))
+            if (e.Result == CalibrationRunnerResult.Success)
             {
-                GazeManager.Instance.AddGazeListener(this);
+                int goodPoints = 0;
+                foreach (CalibrationPoint calibPoint in e.CalibrationResult.Calibpoints)
+                {
+                    goodPoints += calibPoint.Accuracy.Average < 1.0 ? 1 : 0;
+                }
+                calibStatus = (int) Math.Round((CalibrationStatus.N_Status - 1.0) * goodPoints / e.CalibrationResult.Calibpoints.Length);
+                foreach (ICalibrationStatusListener l in calibStatusListeners)
+                {
+                    l.CalibrationStatusChanged(calibStatus);
+                }
+                if (!GazeManager.Instance.HasGazeListener(this))
+                {
+                    GazeManager.Instance.AddGazeListener(this);
+                }
             }
         }
 

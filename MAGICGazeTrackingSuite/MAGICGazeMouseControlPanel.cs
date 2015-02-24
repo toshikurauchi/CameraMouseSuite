@@ -49,10 +49,12 @@ namespace MAGICGazeTrackingSuite
             if (this.magicGazeMouseControlModule.SelectedGazeTracker.Started)
             {
                 this.magicGazeMouseControlModule.SelectedGazeTracker.Stop();
+                this.magicGazeMouseControlModule.SelectedGazeTracker.RemoveCalibrationStatusListener(this);
             }
             this.magicGazeMouseControlModule.SelectedGazeTrackerId = comboBox.SelectedIndex;
             this.magicGazeMouseControlModule.SelectedGazeTracker.Start();
             this.eyeStatusHost.Child = this.magicGazeMouseControlModule.SelectedGazeTracker.EyeStatus;
+            this.magicGazeMouseControlModule.SelectedGazeTracker.AddCalibrationStatusListener(this);
         }
 
         private void calibrateEyeTracker_Click(object sender, EventArgs e)

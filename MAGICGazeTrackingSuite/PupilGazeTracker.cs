@@ -160,6 +160,15 @@ namespace MAGICGazeTrackingSuite
         {
         }
 
+        public void AddCalibrationStatusListener(ICalibrationStatusListener listener)
+        {
+            listener.CalibrationStatusChanged(CalibrationStatus.Good);
+        }
+
+        public void RemoveCalibrationStatusListener(ICalibrationStatusListener listener)
+        {
+        }
+
         public void Stop()
         {
             started = false;
