@@ -37,12 +37,12 @@ namespace MAGICGazeTrackingSuite
 
         public static Line2D HorizontalLine(PointF p)
         {
-            return new Line2D(p, p.Add(new Point(10, 0)));
+            return new Line2D(0, 1, -p.Y);
         }
 
         public static Line2D VerticalLine(PointF p)
         {
-            return new Line2D(p, p.Add(new Point(0, 10)));
+            return new Line2D(1, 0, -p.X);
         }
 
         public PointF Intersect(Line2D other)

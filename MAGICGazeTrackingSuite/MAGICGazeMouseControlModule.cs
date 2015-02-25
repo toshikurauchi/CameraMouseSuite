@@ -38,7 +38,7 @@ namespace MAGICGazeTrackingSuite
 
         private PointF imageOriginPoint;
         private PointF screenOriginPoint;
-        private PointF prevCursorPos;
+        private List<PositionWithTimestamp> prevCursors = new List<PositionWithTimestamp>();
         private PointF prevGazePos;
 
         private bool   reverseHorizontal = false;
@@ -56,10 +56,13 @@ namespace MAGICGazeTrackingSuite
         private int selectedGazeTrackerId;
         private IGazeTracker selectedGazeTracker;
         private List<IGazeTracker> gazeTrackers = new List<IGazeTracker>();
-        private bool usingHead = false;
-        private double headThresh = 0.005; // TODO: this shouldn't be fixed like this
+        private double headThresh = 30; // In pixels/second // TODO: this shouldn't be fixed like this
         private double gazeThresh = 0.125; // TODO: this shouldn't be fixed like this
         private double gazeCursorThresh = 0.1; // TODO: this shouldn't be fixed like this
+        private double outerRegSize = 0.15; // TODO: this shouldn't be fixed like this
+        private double innerRegSize = 0.1; // TODO: this shouldn't be fixed like this
+        private int minCursorPosCount = 3;
+        private long maxCursorTStampDist = 300; // In milliseconds
         private Point currentCell;
         private static int hCell = 9;
         private static int vCell = 5;
@@ -425,77 +428,56 @@ namespace MAGICGazeTrackingSuite
                 imageOriginPoint = new PointF(imagePoint.X, imagePoint.Y);
                 screenOriginPoint = new PointF((float)screenWidth / 2, (float)screenHeight / 2);
                 prevGazePos = new PointF(0, 0);
+                firstFrameInControl = false;
             }
 
             PointF newHeadCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y));
             PointF newGazeCursor = selectedGazeTracker.CurrentGaze();
+            long newCursorTick = Environment.TickCount;
+            prevCursors.RemoveAll(p => newCursorTick - p.TStamp > maxCursorTStampDist);
 
-            if (firstFrameInControl)
-            {
-                prevCursorPos.X = newHeadCursor.X;
-                prevCursorPos.Y = newHeadCursor.Y;
-                firstFrameInControl = false;
-            }
-
-            double hThreshSq = headThresh * headThresh * screenWidth * screenWidth;
             double gThreshSq = gazeThresh * gazeThresh * screenWidth * screenWidth;
             double gCurThreshSq = gazeCursorThresh * gazeCursorThresh * screenWidth * screenWidth;
 
             PointF newCursor = newHeadCursor;
-            if (newHeadCursor.DistSqr(prevCursorPos) >= hThreshSq)
+            if (prevCursors.Count >= minCursorPosCount)
             {
-                //usingHead = true;
-                float outerLength = (float) (0.2*screenWidth);
-                PointF outerHalfBox = new PointF(outerLength / 2, outerLength / 2);
-                PointF outerTopLeft = newGazeCursor.Subtract(outerHalfBox);
-                PointF outerBotRight = newGazeCursor.Add(outerHalfBox);
-                PointF gazeCursorDrct = newGazeCursor.Subtract(prevCursorPos);
-                if (!newGazeCursor.IsEmpty && gazeCursorDrct.Angle(newHeadCursor.Subtract(prevCursorPos)) < 90 && !Geometry.PointInBox(newHeadCursor, outerTopLeft, outerBotRight))
+                PositionWithTimestamp prevCursor = prevCursors.First();
+                PointF headCursorDrct = newHeadCursor.Subtract(prevCursor.Pos);
+                double speedSqr = 1000 * headCursorDrct.Norm() / (newCursorTick - prevCursor.TStamp);
+                Console.WriteLine(speedSqr);
+                if (speedSqr >= headThresh)
                 {
-                    float innerLength = (float) (0.2*screenWidth);
-                    PointF innerHalfBox = new PointF(innerLength / 2, innerLength / 2);
-                    PointF innerTopLeft = newGazeCursor.Subtract(innerHalfBox);
-                    PointF innerBotRight = newGazeCursor.Add(innerHalfBox);
-                    List<PointF> boxIntersections = new List<PointF>();
-                    Line2D gazeCursorLine = new Line2D(newGazeCursor, prevCursorPos);
-                    boxIntersections.Add(gazeCursorLine.Intersect(Line2D.HorizontalLine(innerTopLeft)));
-                    boxIntersections.Add(gazeCursorLine.Intersect(Line2D.VerticalLine(innerTopLeft)));
-                    boxIntersections.Add(gazeCursorLine.Intersect(Line2D.HorizontalLine(innerBotRight)));
-                    boxIntersections.Add(gazeCursorLine.Intersect(Line2D.VerticalLine(innerBotRight)));
-                    newCursor = boxIntersections.Argmin(p => p.DistSqr(prevCursorPos));
-                    Console.WriteLine("POINTS");
-                    Console.WriteLine(boxIntersections[0]);
-                    Console.WriteLine(boxIntersections[1]);
-                    Console.WriteLine(boxIntersections[2]);
-                    Console.WriteLine(boxIntersections[3]);
-                    Console.WriteLine(prevCursorPos);
-                    Console.WriteLine(newCursor);
-                    Console.WriteLine(newGazeCursor);
-                    screenOriginPoint = newGazeCursor;
-                    imageOriginPoint = new PointF(imagePoint.X, imagePoint.Y);
+                    float outerLength = (float)(outerRegSize * screenWidth);
+                    PointF outerHalfBox = new PointF(outerLength / 2, outerLength / 2);
+                    PointF outerTopLeft = newGazeCursor.Subtract(outerHalfBox);
+                    PointF outerBotRight = newGazeCursor.Add(outerHalfBox);
+                    PointF gazeCursorDrct = newGazeCursor.Subtract(prevCursor.Pos);
+                    if (!newGazeCursor.IsEmpty && gazeCursorDrct.Angle(headCursorDrct) < 90 && !Geometry.PointInBox(newHeadCursor, outerTopLeft, outerBotRight))
+                    {
+                        float innerLength = (float)(innerRegSize * screenWidth);
+                        PointF innerHalfBox = new PointF(innerLength / 2, innerLength / 2);
+                        PointF innerTopLeft = newGazeCursor.Subtract(innerHalfBox);
+                        PointF innerBotRight = newGazeCursor.Add(innerHalfBox);
+                        List<PointF> boxIntersections = new List<PointF>();
+                        Line2D gazeCursorLine = new Line2D(newGazeCursor, prevCursor.Pos);
+                        boxIntersections.Add(gazeCursorLine.Intersect(Line2D.HorizontalLine(innerTopLeft)));
+                        boxIntersections.Add(gazeCursorLine.Intersect(Line2D.VerticalLine(innerTopLeft)));
+                        boxIntersections.Add(gazeCursorLine.Intersect(Line2D.HorizontalLine(innerBotRight)));
+                        boxIntersections.Add(gazeCursorLine.Intersect(Line2D.VerticalLine(innerBotRight)));
+                        newCursor = boxIntersections.Argmin(p => p.DistSqr(prevCursor.Pos));
+                        screenOriginPoint = newGazeCursor;
+                        newCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y));
+                        //imageOriginPoint = new PointF(imagePoint.X, imagePoint.Y);
+                    }
                 }
             }
-            /*else if (newGazeCursor.DistSqr(prevGazePos) >= gThreshSq)
-            {
-                usingHead = false;
-            }
-
-            if (usingHead)
-            {
-                newCursor = newHeadCursor;
-            }
-            else if (!newGazeCursor.IsEmpty)
-            {
-                newCursor = newGazeCursor;
-                screenOriginPoint = newGazeCursor;
-                imageOriginPoint = new PointF(imagePoint.X, imagePoint.Y);
-            }*/
             if (!newGazeCursor.IsEmpty)
             {
                 prevGazePos = newGazeCursor;
             }
+            prevCursors.Add(new PositionWithTimestamp(newCursor, newCursorTick));
             newCursor = ApplyCursorBoundaries(newCursor);
-            prevCursorPos = newCursor;
 
             long newTickCount = Environment.TickCount;
             if (newTickCount - this.lastTickCount > this.waitTime)
@@ -505,56 +487,6 @@ namespace MAGICGazeTrackingSuite
                 SetCursorPosition(nx, ny);
                 lastTickCount = newTickCount;
             }
-
-            /*Bitmap frame = frames[0];
-            PointF newCursor = ComputeHeadCursor(imagePoint, new PointF((float)screenWidth / 2, (float)screenHeight / 2));
-
-            PointF cursorDirection = new PointF(newCursor.X - prevCursorPos.X, newCursor.Y - prevCursorPos.Y);
-            PointF newGazeCursor = newCursor;
-            if (cursorDirection.NormSqr() >= 25) // 5 pixels TODO: this shouldn't be fixed like this
-            {
-                selectedGazeTracker.Active = false;
-            }
-            else
-            {
-                selectedGazeTracker.Active = true;
-                PointF gazeCursor = ProcessGaze(newCursor);
-                if (newCursor.Subtract(gazeCursor).NormSqr() > 1e-6)
-                {
-                    firstFrameInControl = true;
-                    newGazeCursor = ComputeHeadCursor(imagePoint, gazeCursor);
-                }
-            }
-            newGazeCursor = ApplyCursorBoundaries(newGazeCursor);
-            prevCursorPos = newCursor;
-
-            long newTickCount = Environment.TickCount;
-            if( newTickCount - this.lastTickCount > this.waitTime )
-            {
-                int nx = (int)newCursor.X;
-                int ny = (int)newCursor.Y;
-                SetCursorPosition(nx, ny);
-                lastTickCount = newTickCount;
-            }*/
-        }
-
-        private PointF ComputeHeadCursor(PointF imagePoint, PointF screenOrigin)
-        {
-            if (firstFrameInControl)
-            {
-                imageOriginPoint = new PointF(imagePoint.X, imagePoint.Y);
-                screenOriginPoint = screenOrigin;
-            }
-
-            PointF tempCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y));
-
-            if (firstFrameInControl)
-            {
-                prevCursorPos.X = tempCursor.X;
-                prevCursorPos.Y = tempCursor.Y;
-                firstFrameInControl = false;
-            }
-            return AdjustCursor(tempCursor, prevCursorPos);
         }
 
         private PointF ProcessGazedCell(PointF gaze, PointF cursor)

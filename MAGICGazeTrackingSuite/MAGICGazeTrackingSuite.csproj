@@ -81,6 +81,7 @@
       <DependentUpon>MAGICGazeMouseControlPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="MAGICGazeMouseControlModule.cs" />
+    <Compile Include="PositionWithTimestamp.cs" />
     <Compile Include="PupilGazeTracker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
