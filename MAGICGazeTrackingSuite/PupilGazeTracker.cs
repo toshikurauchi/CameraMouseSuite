@@ -20,26 +20,28 @@ using System.Text;
 using System.Threading;
 using System.Drawing;
 using System.Collections;
-using Castle.Zmq;
 using System.Windows.Forms;
+using NetMQ;
+using NetMQ.Sockets;
+using NetMQ.zmq;
+using System.Collections.Concurrent;
 
 namespace MAGICGazeTrackingSuite
 {
     public class PupilGazeTracker : IGazeTracker
     {
-        private Context context;
-        private Socket client;
-
         private Thread clientThread;
         private ManualResetEvent stopEvent;
-        private ArrayList latestData;
+        private ConcurrentQueue<GazeData> latestData;
         private static int FILTER_TIME_WINDOW = 100; // In milliseconds
         private bool active = true;
         private bool started = false;
         private float screenWidth = 0;
         private float screenHeight = 0;
 
-        private UserControl panel;
+        private string connectionString;
+
+        private PupilPanel panel;
 
         public PupilGazeTracker(float screenWidth, float screenHeight)
         {
@@ -60,16 +62,9 @@ namespace MAGICGazeTrackingSuite
 
         public PointF CurrentGaze()
         {
-            if (!started)
-            {
-                return PointF.Empty;
-            }
             if (clientThread == null)
             {
-                stopEvent = new ManualResetEvent(false);
-                clientThread = new Thread(new ThreadStart(ReceiveGazeData));
-                clientThread.Priority = ThreadPriority.AboveNormal;
-                clientThread.Start();
+                return PointF.Empty;
             }
 
             UpdateLatestData();
@@ -89,8 +84,11 @@ namespace MAGICGazeTrackingSuite
             ArrayList yValues = new ArrayList(latestData.Count);
             foreach (GazeData data in latestData)
             {
-                xValues.Add(data.GazeOnScreen.X);
-                yValues.Add(data.GazeOnScreen.Y);
+                if (!data.GazeOnScreen.IsEmpty)
+                {
+                    xValues.Add(data.GazeOnScreen.X);
+                    yValues.Add(data.GazeOnScreen.Y);
+                }
             }
             xValues.Sort();
             yValues.Sort();
@@ -103,52 +101,52 @@ namespace MAGICGazeTrackingSuite
 
         private void UpdateLatestData()
         {
-            for (int i = latestData.Count - 1; i >= 0; i--)
+            bool removing = true;
+            while (removing)
             {
-                GazeData data = (GazeData)latestData[i];
-                if (data == null || !data.GazeIsOnScreen() || DateTime.Now.Subtract(data.LocalTimestamp).Milliseconds >= FILTER_TIME_WINDOW)
+                GazeData first;
+                if (latestData.TryPeek(out first))
                 {
-                    latestData.RemoveAt(i);
+                    if (DateTime.Now.Subtract(first.LocalTimestamp).TotalMilliseconds >= FILTER_TIME_WINDOW)
+                    {
+                        latestData.TryDequeue(out first);
+                    }
+                    else
+                    {
+                        removing = false;
+                    }
+                }
+                else
+                {
+                    removing = false;
                 }
             }
         }
 
         public void ReceiveGazeData()
         {
-            while(!stopEvent.WaitOne(0, true))
+            using (NetMQContext context = NetMQContext.Create())
+            using (var client = context.CreateSubscriberSocket())
             {
-                if (context == null)
+                client.Connect(connectionString);
+                client.Subscribe("Gaze");
+
+                while (!stopEvent.WaitOne(0, true))
                 {
-                    context = new Context();
-                }
-                if (client == null)
-                {
-                    client = (Castle.Zmq.Socket)context.CreateSocket(SocketType.Sub);
-                    client.Connect("tcp://127.0.0.1:5000");
-                    client.SetOption(SocketOpt.SUBSCRIBE, new byte[0]);
-                }
-                try
-                {
-                    byte[] reply = client.Recv(RecvFlags.DoNotWait);
-                    if (reply != null)
+                    try
                     {
-                        string msg = Encoding.ASCII.GetString(reply);
-                        if (msg.StartsWith("Pupil"))
-                        {
-                            latestData.Add(new GazeData(msg));
-                        }
+                        string msg = client.ReceiveString(SendReceiveOptions.DontWait);
+                        latestData.Enqueue(new GazeData(msg));
                     }
+                    catch (NetMQException e) {}
                 }
-                catch (Castle.Zmq.ZmqException e)
-                {
-                    Console.WriteLine(e.Message);
-                }
+                Console.WriteLine("OUT!");
             }
         }
 
         public void Start()
         {
-            latestData = ArrayList.Synchronized(new ArrayList());
+            latestData = new ConcurrentQueue<GazeData>();
             Active = true;
             started = true;
         }
@@ -161,6 +159,28 @@ namespace MAGICGazeTrackingSuite
         public void Stop()
         {
             started = false;
+            StopClient();
+        }
+
+        public void StartClient(string serverIP, string port)
+        {
+            string newConnectionString = "tcp://" + serverIP + ":" + port;
+            if (connectionString != null && !connectionString.Equals(newConnectionString))
+            {
+                StopClient();
+            }
+            if (clientThread == null)
+            {
+                connectionString = newConnectionString;
+                stopEvent = new ManualResetEvent(false);
+                clientThread = new Thread(new ThreadStart(ReceiveGazeData));
+                clientThread.Priority = ThreadPriority.AboveNormal;
+                clientThread.Start();
+            }
+        }
+
+        public void StopClient()
+        {
             if (clientThread != null)
             {
                 stopEvent.Set();
@@ -178,6 +198,7 @@ namespace MAGICGazeTrackingSuite
                 if (panel == null)
                 {
                     panel = new PupilPanel();
+                    panel.EyeTracker = this;
                 }
                 return panel; 
             } 

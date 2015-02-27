@@ -175,9 +175,6 @@
     <Reference Include="AHMUtility">
       <HintPath>..\lib\AHMUtility.dll</HintPath>
     </Reference>
-    <Reference Include="Castle.Zmq">
-      <HintPath>..\packages\Castle.Zmq.4.0.1\lib\net40\Castle.Zmq.dll</HintPath>
-    </Reference>
     <Reference Include="DirectShowLib-2005, Version=2.0.0.0, Culture=neutral, PublicKeyToken=67e7b740cdfc2d3f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\DirectShowLib-2005.dll</HintPath>
@@ -185,6 +182,9 @@
     <Reference Include="dshow, Version=1.0.1924.15338, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\dshow.dll</HintPath>
+    </Reference>
+    <Reference Include="NetMQ">
+      <HintPath>..\packages\NetMQ.3.3.0.11\lib\net40\NetMQ.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>

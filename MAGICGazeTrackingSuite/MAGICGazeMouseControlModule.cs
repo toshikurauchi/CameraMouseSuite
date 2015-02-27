@@ -58,8 +58,6 @@ namespace MAGICGazeTrackingSuite
         private IGazeTracker selectedGazeTracker;
         private List<IGazeTracker> gazeTrackers = new List<IGazeTracker>();
         private double headThresh = 30; // In pixels/second // TODO: this shouldn't be fixed like this
-        private double gazeThresh = 0.125; // TODO: this shouldn't be fixed like this
-        private double gazeCursorThresh = 0.1; // TODO: this shouldn't be fixed like this
         private double outerRegSize = 0.15; // TODO: this shouldn't be fixed like this
         private double innerRegSize = 0.1; // TODO: this shouldn't be fixed like this
         private int minCursorPosCount = 3;
@@ -436,10 +434,7 @@ namespace MAGICGazeTrackingSuite
             PointF newGazeCursor = selectedGazeTracker.CurrentGaze();
             long newCursorTick = Environment.TickCount;
             prevCursors.RemoveAll(p => newCursorTick - p.TStamp > maxCursorTStampDist);
-
-            double gThreshSq = gazeThresh * gazeThresh * screenWidth * screenWidth;
-            double gCurThreshSq = gazeCursorThresh * gazeCursorThresh * screenWidth * screenWidth;
-
+            
             PointF newCursor = newHeadCursor;
             if (prevCursors.Count >= minCursorPosCount)
             {

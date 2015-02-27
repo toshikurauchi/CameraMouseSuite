@@ -8,8 +8,6 @@ namespace MAGICGazeTrackingSuite
         private double timestamp = -1;
         private double confidence = -1;
         private PointF normGaze = new PointF(-1, -1);
-        private double apparentPupilSize = -1;
-        private PointF normPupil = new PointF(-1, -1);
         private PointF gazeOnScreen = new PointF(-1, -1);
         private DateTime localTimestamp;
 
@@ -68,28 +66,6 @@ namespace MAGICGazeTrackingSuite
                 this.normGaze = value;
             }
         }
-        public double ApparentPupilSize
-        {
-            get
-            {
-                return this.apparentPupilSize;
-            }
-            set
-            {
-                this.apparentPupilSize = value;
-            }
-        }
-        public PointF NormPupil
-        {
-            get
-            {
-                return this.normPupil;
-            }
-            set
-            {
-                this.normPupil = value;
-            }
-        }
         public PointF GazeOnScreen
         {
             get
@@ -111,11 +87,6 @@ namespace MAGICGazeTrackingSuite
             {
                 this.localTimestamp = value;
             }
-        }
-
-        public bool GazeIsOnScreen()
-        {
-            return GazeOnScreen.X >= 0 && GazeOnScreen.X <= 1 && GazeOnScreen.Y >= 0 && GazeOnScreen.Y <= 1;
         }
 
         private bool CheckNone(string[] values)
@@ -144,17 +115,9 @@ namespace MAGICGazeTrackingSuite
             {
                 this.confidence = Convert.ToDouble(values[0]);
             }
-            else if (key.Equals("norm_gaze") && values.Length >= 2)
+            else if (key.Equals("norm_pos") && values.Length >= 2)
             {
                 this.normGaze = new PointF(Convert.ToSingle(values[0]), Convert.ToSingle(values[1]));
-            }
-            else if (key.Equals("apparent_pupil_size") && values.Length >= 1)
-            {
-                this.apparentPupilSize = Convert.ToDouble(values[0]);
-            }
-            else if (key.Equals("norm_pupil") && values.Length >= 2)
-            {
-                this.normPupil = new PointF(Convert.ToSingle(values[0]), Convert.ToSingle(values[1]));
             }
             else if (key.Equals("realtime gaze on screen") && values.Length >= 2)
             {
@@ -164,7 +127,7 @@ namespace MAGICGazeTrackingSuite
 
         public override string ToString()
         {
-            return String.Format("GazeData: timestamp: {0}, confidence: {1}, normGaze: ({2},{3}), appPupilSize: {4}, normPupil: ({5},{6}), gazeOnScreen: ({7},{8})", timestamp, confidence, normGaze.X, normGaze.Y, apparentPupilSize, normPupil.X, normPupil.Y, gazeOnScreen.X, gazeOnScreen.Y);
+            return String.Format("GazeData: timestamp: {0}, confidence: {1}, normGaze: ({2},{3}), gazeOnScreen: ({4},{5})", timestamp, confidence, normGaze.X, normGaze.Y, gazeOnScreen.X, gazeOnScreen.Y);
         }
     }
 }
