@@ -21,7 +21,7 @@ using System.Threading;
 using System.Drawing;
 using System.Collections;
 using Castle.Zmq;
-using System.Windows.Controls;
+using System.Windows.Forms;
 
 namespace MAGICGazeTrackingSuite
 {
@@ -38,6 +38,8 @@ namespace MAGICGazeTrackingSuite
         private bool started = false;
         private float screenWidth = 0;
         private float screenHeight = 0;
+
+        private UserControl panel;
 
         public PupilGazeTracker(float screenWidth, float screenHeight)
         {
@@ -156,19 +158,6 @@ namespace MAGICGazeTrackingSuite
             get { return started; }
         }
 
-        public void Calibrate()
-        {
-        }
-
-        public void AddCalibrationStatusListener(ICalibrationStatusListener listener)
-        {
-            listener.CalibrationStatusChanged(CalibrationStatus.Good);
-        }
-
-        public void RemoveCalibrationStatusListener(ICalibrationStatusListener listener)
-        {
-        }
-
         public void Stop()
         {
             started = false;
@@ -182,9 +171,16 @@ namespace MAGICGazeTrackingSuite
             }
         }
 
-        public UserControl EyeStatus
+        public UserControl EyeTrackerTab
         { 
-            get { return null; } 
+            get 
+            {
+                if (panel == null)
+                {
+                    panel = new PupilPanel();
+                }
+                return panel; 
+            } 
         }
     }
 }

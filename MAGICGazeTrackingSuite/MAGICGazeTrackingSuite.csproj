@@ -65,6 +65,12 @@
       <DependentUpon>EyeStatusControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="EyeTribeGazeTracker.cs" />
+    <Compile Include="EyeTribePanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="EyeTribePanel.Designer.cs">
+      <DependentUpon>EyeTribePanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Geometry.cs" />
     <Compile Include="ICalibrationStatusListener.cs" />
     <Compile Include="IGazeTracker.cs" />
@@ -84,6 +90,12 @@
     <Compile Include="PositionWithTimestamp.cs" />
     <Compile Include="PupilGazeTracker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PupilPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PupilPanel.Designer.cs">
+      <DependentUpon>PupilPanel.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CameraMouseSuiteCommon\CameraMouseSuiteCommon.csproj">
@@ -96,8 +108,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="EyeTribePanel.resx">
+      <DependentUpon>EyeTribePanel.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MAGICGazeMouseControlPanel.resx">
       <DependentUpon>MAGICGazeMouseControlPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PupilPanel.resx">
+      <DependentUpon>PupilPanel.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Controls;
+using System.Windows.Forms;
 using TETControls.Calibration;
 using TETCSharpClient;
 using TETCSharpClient.Data;
@@ -21,6 +21,7 @@ namespace MAGICGazeTrackingSuite
         private long timeWindowDur = 500;
         private HashSet<ICalibrationStatusListener> calibStatusListeners = new HashSet<ICalibrationStatusListener>();
         private CalibrationStatus calibStatus = CalibrationStatus.NotCalibrated;
+        private EyeTribePanel panel;
 
         public EyeTribeGazeTracker()
         {
@@ -119,9 +120,19 @@ namespace MAGICGazeTrackingSuite
             }
         }
 
-        public UserControl EyeStatus
+
+        public UserControl EyeTrackerTab
         {
-            get { return new EyeStatusControl(); }
+            get 
+            {
+                if (panel == null)
+                {
+                    panel = new EyeTribePanel();
+                    panel.EyeTracker = this;
+                    AddCalibrationStatusListener(panel);
+                }
+                return panel; 
+            }
         }
     }
 }

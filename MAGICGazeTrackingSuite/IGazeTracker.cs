@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Drawing;
-using System.Windows.Controls;
+using System.Windows.Forms;
 
 namespace MAGICGazeTrackingSuite
 {
@@ -11,10 +11,7 @@ namespace MAGICGazeTrackingSuite
         PointF CurrentGaze();
         void Start();
         bool Started { get; }
-        UserControl EyeStatus { get; }
-        void Calibrate();
-        void AddCalibrationStatusListener(ICalibrationStatusListener listener);
-        void RemoveCalibrationStatusListener(ICalibrationStatusListener listener);
+        UserControl EyeTrackerTab { get; }
         void Stop();
     }
 }

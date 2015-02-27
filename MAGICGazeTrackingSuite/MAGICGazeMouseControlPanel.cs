@@ -48,18 +48,27 @@ namespace MAGICGazeTrackingSuite
             ComboBox comboBox = (ComboBox) sender;
             if (this.magicGazeMouseControlModule.SelectedGazeTracker.Started)
             {
+                this.eyeTrackerPanel.Controls.Clear();
                 this.magicGazeMouseControlModule.SelectedGazeTracker.Stop();
-                this.magicGazeMouseControlModule.SelectedGazeTracker.RemoveCalibrationStatusListener(this);
             }
             this.magicGazeMouseControlModule.SelectedGazeTrackerId = comboBox.SelectedIndex;
-            this.magicGazeMouseControlModule.SelectedGazeTracker.Start();
-            this.eyeStatusHost.Child = this.magicGazeMouseControlModule.SelectedGazeTracker.EyeStatus;
-            this.magicGazeMouseControlModule.SelectedGazeTracker.AddCalibrationStatusListener(this);
         }
 
-        private void calibrateEyeTracker_Click(object sender, EventArgs e)
+        private void startEyeTracker_Click(object sender, EventArgs e)
         {
-            this.magicGazeMouseControlModule.SelectedGazeTracker.Calibrate();
+            if (this.startEyeTracker.Text.Equals("Start"))
+            {
+                this.magicGazeMouseControlModule.SelectedGazeTracker.Start();
+                this.eyeTrackerPanel.Controls.Clear();
+                this.eyeTrackerPanel.Controls.Add(this.magicGazeMouseControlModule.SelectedGazeTracker.EyeTrackerTab);
+                this.startEyeTracker.Text = "Stop";
+            }
+            else
+            {
+                this.eyeTrackerPanel.Controls.Clear();
+                this.magicGazeMouseControlModule.SelectedGazeTracker.Stop();
+                this.startEyeTracker.Text = "Start";
+            }
         }
 
         private void Horiz_gain_SelectedIndexChanged(object sender, EventArgs e)

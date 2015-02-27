@@ -23,6 +23,7 @@ using CameraMouseSuite;
 using System.Drawing;
 using System.Diagnostics;
 using System.Xml.Serialization;
+using System.Windows.Forms;
 
 namespace MAGICGazeTrackingSuite
 {
@@ -564,7 +565,13 @@ namespace MAGICGazeTrackingSuite
 
         public override void ProcessKeys(System.Windows.Forms.Keys keys)
         {
-
+            if (keys.Equals(Keys.LControlKey) || keys.Equals(Keys.RControlKey))
+            {
+                PointF gaze = selectedGazeTracker.CurrentGaze();
+                int nx = (int)gaze.X;
+                int ny = (int)gaze.Y;
+                SetCursorPosition(nx, ny);
+            }
         }
 
         public override void Update(CMSModule module)
