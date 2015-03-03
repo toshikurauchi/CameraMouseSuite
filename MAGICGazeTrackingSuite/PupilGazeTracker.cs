@@ -140,13 +140,12 @@ namespace MAGICGazeTrackingSuite
                     }
                     catch (NetMQException e) {}
                 }
-                Console.WriteLine("OUT!");
             }
         }
 
         public void Start()
         {
-            latestData = new ConcurrentQueue<GazeData>();
+            latestData = new ConcurrentQueue<GazeData>();                                   
             Active = true;
             started = true;
         }

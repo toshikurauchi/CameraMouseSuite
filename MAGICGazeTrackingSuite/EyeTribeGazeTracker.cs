@@ -18,7 +18,7 @@ namespace MAGICGazeTrackingSuite
         private bool started = false;
         private PointF gaze = PointF.Empty;
         private List<TETCSharpClient.Data.GazeData> previousData;
-        private long timeWindowDur = 500;
+        private long timeWindowDur = 100;
         private HashSet<ICalibrationStatusListener> calibStatusListeners = new HashSet<ICalibrationStatusListener>();
         private CalibrationStatus calibStatus = CalibrationStatus.NotCalibrated;
         private EyeTribePanel panel;
