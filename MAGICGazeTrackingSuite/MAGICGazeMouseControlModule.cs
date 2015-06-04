@@ -24,6 +24,7 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Xml.Serialization;
 using System.Windows.Forms;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace MAGICGazeTrackingSuite
 {
@@ -41,10 +42,11 @@ namespace MAGICGazeTrackingSuite
         private PointF screenOriginPoint;
         private List<PositionWithTimestamp> prevCursors = new List<PositionWithTimestamp>();
         private PointF prevGazePos;
+        private PointF prevCursor;
 
         private bool   reverseHorizontal = false;
         private bool   moveMouse = true;
-        private bool   useGrid = false;
+        private bool   warpPointer = false;
         private double userHorizontalGain = 6.0;
         private double userVerticalGain = 6.0;
         private double damping = 0.65;
@@ -62,9 +64,13 @@ namespace MAGICGazeTrackingSuite
         private double innerRegSize = 0.1; // TODO: this shouldn't be fixed like this
         private int minCursorPosCount = 3;
         private long maxCursorTStampDist = 300; // In milliseconds
-        private Point currentCell;
-        private static int hCell = 9;
-        private static int vCell = 5;
+        private Matrix<double> gainMap;
+        private PointF gainMapCenter;
+
+        private ExcludeForm eastExcludeForm = null;
+        private ExcludeForm westExcludeForm = null;
+        private ExcludeForm southExcludeForm = null;
+        private ExcludeForm northExcludeForm = null;
 
         public MAGICGazeMouseControlModule()
         {
@@ -72,7 +78,7 @@ namespace MAGICGazeTrackingSuite
             this.gazeTrackers.Add(new PupilGazeTracker((float)CMSConstants.SCREEN_WIDTH, (float)CMSConstants.SCREEN_HEIGHT));
             this.selectedGazeTracker = this.gazeTrackers.First();
             this.selectedGazeTrackerId = 0;
-            currentCell = new Point(-1, -1);
+            this.prevCursor = new PointF(-1, -1);
         }
 
         [XmlIgnore()]
@@ -121,15 +127,15 @@ namespace MAGICGazeTrackingSuite
                 moveMouse = value;
             }
         }
-        public bool UseGrid
+        public bool WarpPointer
         {
             get
             {
-                return useGrid;
+                return warpPointer;
             }
             set
             {
-                useGrid = value;
+                warpPointer = value;
             }
         }
         public bool ReverseHorizontal
@@ -225,12 +231,6 @@ namespace MAGICGazeTrackingSuite
             }
         }
 
-        private ExcludeForm eastExcludeForm = null;
-        private ExcludeForm westExcludeForm = null;
-        private ExcludeForm southExcludeForm = null;
-        private ExcludeForm northExcludeForm = null;
-
-
         private void UpdateForms()
         {
             double screenWidth = CMSConstants.SCREEN_WIDTH;
@@ -262,6 +262,16 @@ namespace MAGICGazeTrackingSuite
                 northExcludeForm.SetHorizontal(y, (int)(westLimit * screenWidth) - 4,
                                            (int)((1.0 - eastLimit) * screenWidth) + 4, 6);
             }
+
+            // Initialize gain map
+            double sigma = screenWidth / 10;
+            int w = (int)screenWidth;
+            int h = (int)screenHeight;
+            gainMapCenter = new PointF(w - 1, h - 1);
+            // Creates an upside-down scaled gaussian function (value is always > 0)
+            // TODO Should be more configurable
+            Func<int,int,double> invGaussianFunc = (i,j) => 5*(1-0.9*Math.Exp(-(Math.Pow(i-gainMapCenter.Y,2)+Math.Pow(j-gainMapCenter.X,2))/(2*Math.Pow(sigma,2))));
+            gainMap = Matrix<double>.Build.Dense(2*h-1, 2*w-1, invGaussianFunc);
         }
 
         private void ShowExcludeForms()
@@ -380,13 +390,27 @@ namespace MAGICGazeTrackingSuite
             return cur;
         }
 
-        public PointF ComputeCursor(PointF imagePoint)
+        public PointF ComputeCursor(PointF imagePoint, PointF gazePoint = default(PointF))
         {
             double difx = imagePoint.X - imageOriginPoint.X;
             double dify = imagePoint.Y - imageOriginPoint.Y;
 
-            difx *= this.userHorizontalGain * screenWidth / imageWidth;
-            dify *= this.userVerticalGain * screenHeight / imageHeight;
+            double hGain = this.userHorizontalGain;
+            double vGain = this.userVerticalGain;
+            if (!gazePoint.IsEmpty && 
+                0 <= gazePoint.X && gazePoint.X < screenWidth && 
+                0 <= gazePoint.Y && gazePoint.Y < screenHeight && 
+                prevCursor.X != -1 && prevCursor.Y != -1)
+            {
+                // Value at the previous cursor position if the gain map is centered at the gaze position
+                PointF mapPos = gainMapCenter.Add(prevCursor.Subtract(gazePoint));
+                double gainFactor = gainMap.At((int)mapPos.Y, (int)mapPos.X);
+                hGain = hGain * gainFactor;
+                vGain = vGain * gainFactor;
+            }
+
+            difx *= hGain * screenWidth / imageWidth;
+            dify *= vGain * screenHeight / imageHeight;
 
             if( this.reverseHorizontal )
                 difx *= -1.0;
@@ -436,37 +460,42 @@ namespace MAGICGazeTrackingSuite
             prevCursors.RemoveAll(p => newCursorTick - p.TStamp > maxCursorTStampDist);
             
             PointF newCursor = newHeadCursor;
-            if (prevCursors.Count >= minCursorPosCount)
+            if (warpPointer)
             {
-                PositionWithTimestamp prevCursor = prevCursors.First();
-                PointF headCursorDrct = newHeadCursor.Subtract(prevCursor.Pos);
-                double speedSqr = 1000 * headCursorDrct.Norm() / (newCursorTick - prevCursor.TStamp);
-                Console.WriteLine(speedSqr);
-                if (speedSqr >= headThresh)
+                if (prevCursors.Count >= minCursorPosCount)
                 {
-                    float outerLength = (float)(outerRegSize * screenWidth);
-                    PointF outerHalfBox = new PointF(outerLength / 2, outerLength / 2);
-                    PointF outerTopLeft = newGazeCursor.Subtract(outerHalfBox);
-                    PointF outerBotRight = newGazeCursor.Add(outerHalfBox);
-                    PointF gazeCursorDrct = newGazeCursor.Subtract(prevCursor.Pos);
-                    if (!newGazeCursor.IsEmpty && gazeCursorDrct.Angle(headCursorDrct) < 90 && !Geometry.PointInBox(newHeadCursor, outerTopLeft, outerBotRight))
+                    PositionWithTimestamp prevCursor = prevCursors.First();
+                    PointF headCursorDrct = newHeadCursor.Subtract(prevCursor.Pos);
+                    double speedSqr = 1000 * headCursorDrct.Norm() / (newCursorTick - prevCursor.TStamp);
+                    if (speedSqr >= headThresh)
                     {
-                        float innerLength = (float)(innerRegSize * screenWidth);
-                        PointF innerHalfBox = new PointF(innerLength / 2, innerLength / 2);
-                        PointF innerTopLeft = newGazeCursor.Subtract(innerHalfBox);
-                        PointF innerBotRight = newGazeCursor.Add(innerHalfBox);
-                        List<PointF> boxIntersections = new List<PointF>();
-                        Line2D gazeCursorLine = new Line2D(newGazeCursor, prevCursor.Pos);
-                        boxIntersections.Add(gazeCursorLine.Intersect(Line2D.HorizontalLine(innerTopLeft)));
-                        boxIntersections.Add(gazeCursorLine.Intersect(Line2D.VerticalLine(innerTopLeft)));
-                        boxIntersections.Add(gazeCursorLine.Intersect(Line2D.HorizontalLine(innerBotRight)));
-                        boxIntersections.Add(gazeCursorLine.Intersect(Line2D.VerticalLine(innerBotRight)));
-                        newCursor = boxIntersections.Argmin(p => p.DistSqr(prevCursor.Pos));
-                        screenOriginPoint = newGazeCursor;
-                        newCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y));
-                        //imageOriginPoint = new PointF(imagePoint.X, imagePoint.Y);
+                        float outerLength = (float)(outerRegSize * screenWidth);
+                        PointF outerHalfBox = new PointF(outerLength / 2, outerLength / 2);
+                        PointF outerTopLeft = newGazeCursor.Subtract(outerHalfBox);
+                        PointF outerBotRight = newGazeCursor.Add(outerHalfBox);
+                        PointF gazeCursorDrct = newGazeCursor.Subtract(prevCursor.Pos);
+                        if (!newGazeCursor.IsEmpty && gazeCursorDrct.Angle(headCursorDrct) < 90 && !Geometry.PointInBox(newHeadCursor, outerTopLeft, outerBotRight))
+                        {
+                            float innerLength = (float)(innerRegSize * screenWidth);
+                            PointF innerHalfBox = new PointF(innerLength / 2, innerLength / 2);
+                            PointF innerTopLeft = newGazeCursor.Subtract(innerHalfBox);
+                            PointF innerBotRight = newGazeCursor.Add(innerHalfBox);
+                            List<PointF> boxIntersections = new List<PointF>();
+                            Line2D gazeCursorLine = new Line2D(newGazeCursor, prevCursor.Pos);
+                            boxIntersections.Add(gazeCursorLine.Intersect(Line2D.HorizontalLine(innerTopLeft)));
+                            boxIntersections.Add(gazeCursorLine.Intersect(Line2D.VerticalLine(innerTopLeft)));
+                            boxIntersections.Add(gazeCursorLine.Intersect(Line2D.HorizontalLine(innerBotRight)));
+                            boxIntersections.Add(gazeCursorLine.Intersect(Line2D.VerticalLine(innerBotRight)));
+                            newCursor = boxIntersections.Argmin(p => p.DistSqr(prevCursor.Pos));
+                            screenOriginPoint = newGazeCursor;
+                            newCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y));
+                        }
                     }
                 }
+            }
+            else
+            {
+                // TODO compute gain map and apply
             }
             if (!newGazeCursor.IsEmpty)
             {
@@ -481,65 +510,8 @@ namespace MAGICGazeTrackingSuite
                 int nx = (int)newCursor.X;
                 int ny = (int)newCursor.Y;
                 SetCursorPosition(nx, ny);
+                prevCursor = newCursor;
                 lastTickCount = newTickCount;
-            }
-        }
-
-        private PointF ProcessGazedCell(PointF gaze, PointF cursor)
-        {
-            int cellWidth = (int)screenWidth / hCell;
-            int cellHeight = (int)screenHeight / vCell;
-            int xBorder = cellWidth / 2;
-            int yBorder = cellHeight / 2;
-
-            // Min is used for the case in which gaze has maximum coordinates 
-            // (normalized gaze x or y equal to 1)
-            int gazeXCell = Math.Min((int)gaze.X / cellWidth, hCell - 1);
-            int gazeYCell = Math.Min((int)gaze.Y / cellHeight, vCell - 1);
-            
-            if (currentCell.X >= 0 && currentCell.Y >= 0)
-            {
-                int lLimit = currentCell.X * cellWidth - xBorder;
-                int rLimit = (currentCell.X + 1) * cellWidth + xBorder;
-                int bLimit = currentCell.Y * cellHeight - yBorder;
-                int tLimit = (currentCell.Y + 1) * cellHeight + yBorder;
-                if (gaze.X >= lLimit && gaze.X <= rLimit && gaze.Y >= bLimit && gaze.Y <= tLimit)
-                {
-                    return cursor;
-                }
-            }
-            currentCell = new Point(gazeXCell, gazeYCell);
-            return new PointF((gazeXCell + 0.5f) * cellWidth, (gazeYCell + 0.5f) * cellHeight);
-        }
-
-        private PointF ProcessGazedRegion(PointF gaze, PointF cursor)
-        {
-            float minDist = (float)screenWidth / 10; // TODO this should be configurable
-            float sqrDist = cursor.Subtract(gaze).NormSqr();
-            if (sqrDist > minDist * minDist)
-            {
-                return gaze;
-            }
-            else
-            {
-                return cursor;
-            }
-        }
-
-        private PointF ProcessGaze(PointF cursor)
-        {
-            PointF gaze = selectedGazeTracker.CurrentGaze();
-            if (gaze.IsEmpty)
-            {
-                return cursor;
-            }
-            if (useGrid)
-            {
-                return ProcessGazedCell(gaze, cursor);
-            }
-            else
-            {
-                return ProcessGazedRegion(gaze, cursor);
             }
         }
 

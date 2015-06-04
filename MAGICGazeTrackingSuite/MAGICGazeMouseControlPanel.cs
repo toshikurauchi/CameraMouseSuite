@@ -230,8 +230,8 @@ namespace MAGICGazeTrackingSuite
         {
             if (!loadingControls)
             {
-                bool check = useGridCheckBox.Checked;
-                magicGazeMouseControlModule.UseGrid = check;
+                bool check = warpPointerCheckBox.Checked;
+                magicGazeMouseControlModule.WarpPointer = check;
                 sendLogAdvancedTracker();
             }
         }
@@ -258,7 +258,7 @@ namespace MAGICGazeTrackingSuite
             eyeTracker.DisplayMember = "Name";
 
             moveMouseCheckBox.Checked = magicGazeMouseControlModule.MoveMouse;
-            useGridCheckBox.Checked = magicGazeMouseControlModule.UseGrid;
+            warpPointerCheckBox.Checked = magicGazeMouseControlModule.WarpPointer;
             ChangeMouseControlItemsEnabled(magicGazeMouseControlModule.MoveMouse);
 
             double val = Math.Round(100.0F * magicGazeMouseControlModule.EastLimit);
