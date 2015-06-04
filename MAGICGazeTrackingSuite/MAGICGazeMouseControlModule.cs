@@ -270,7 +270,7 @@ namespace MAGICGazeTrackingSuite
             gainMapCenter = new PointF(w - 1, h - 1);
             // Creates an upside-down scaled gaussian function (value is always > 0)
             // TODO Should be more configurable
-            Func<int,int,double> invGaussianFunc = (i,j) => 5*(1-0.9*Math.Exp(-(Math.Pow(i-gainMapCenter.Y,2)+Math.Pow(j-gainMapCenter.X,2))/(2*Math.Pow(sigma,2))));
+            Func<int,int,double> invGaussianFunc = (i,j) => 10*(1-0.9*Math.Exp(-(Math.Pow(i-gainMapCenter.Y,2)+Math.Pow(j-gainMapCenter.X,2))/(2*Math.Pow(sigma,2))));
             gainMap = Matrix<double>.Build.Dense(2*h-1, 2*w-1, invGaussianFunc);
         }
 
@@ -460,13 +460,14 @@ namespace MAGICGazeTrackingSuite
             prevCursors.RemoveAll(p => newCursorTick - p.TStamp > maxCursorTStampDist);
             
             PointF newCursor = newHeadCursor;
-            if (warpPointer)
+            if (prevCursors.Count >= minCursorPosCount)
             {
-                if (prevCursors.Count >= minCursorPosCount)
+                PositionWithTimestamp prevCursor = prevCursors.First();
+                PointF headCursorDrct = newHeadCursor.Subtract(prevCursor.Pos);
+                double speedSqr = 1000 * headCursorDrct.Norm() / (newCursorTick - prevCursor.TStamp);
+
+                if (warpPointer)
                 {
-                    PositionWithTimestamp prevCursor = prevCursors.First();
-                    PointF headCursorDrct = newHeadCursor.Subtract(prevCursor.Pos);
-                    double speedSqr = 1000 * headCursorDrct.Norm() / (newCursorTick - prevCursor.TStamp);
                     if (speedSqr >= headThresh)
                     {
                         float outerLength = (float)(outerRegSize * screenWidth);
@@ -492,10 +493,10 @@ namespace MAGICGazeTrackingSuite
                         }
                     }
                 }
-            }
-            else
-            {
-                // TODO compute gain map and apply
+                else
+                {
+                    newCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y), newGazeCursor);
+                }
             }
             if (!newGazeCursor.IsEmpty)
             {
