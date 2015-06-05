@@ -66,6 +66,7 @@ namespace MAGICGazeTrackingSuite
         private long maxCursorTStampDist = 300; // In milliseconds
         private Matrix<double> gainMap;
         private PointF gainMapCenter;
+        private PointF lastStableGaze;
 
         private ExcludeForm eastExcludeForm = null;
         private ExcludeForm westExcludeForm = null;
@@ -390,6 +391,12 @@ namespace MAGICGazeTrackingSuite
             return cur;
         }
 
+        private bool WithinScreen(PointF point)
+        {
+            return 0 <= point.X && point.X < screenWidth && 
+                   0 <= point.Y && point.Y < screenHeight;
+        }
+
         public PointF ComputeCursor(PointF imagePoint, PointF gazePoint = default(PointF))
         {
             double difx = imagePoint.X - imageOriginPoint.X;
@@ -397,9 +404,7 @@ namespace MAGICGazeTrackingSuite
 
             double hGain = this.userHorizontalGain;
             double vGain = this.userVerticalGain;
-            if (!gazePoint.IsEmpty && 
-                0 <= gazePoint.X && gazePoint.X < screenWidth && 
-                0 <= gazePoint.Y && gazePoint.Y < screenHeight && 
+            if (!gazePoint.IsEmpty && WithinScreen(gazePoint) && 
                 prevCursor.X != -1 && prevCursor.Y != -1)
             {
                 // Value at the previous cursor position if the gain map is centered at the gaze position
@@ -495,7 +500,15 @@ namespace MAGICGazeTrackingSuite
                 }
                 else
                 {
-                    newCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y), newGazeCursor);
+                    if (speedSqr < headThresh && WithinScreen(newGazeCursor) && lastStableGaze.Dist(newGazeCursor) > screenWidth/20)
+                    {
+                        lastStableGaze = newGazeCursor;
+                        Console.WriteLine(lastStableGaze);
+                    }
+                    if (!lastStableGaze.IsEmpty)
+                    {
+                        newCursor = ComputeCursor(new PointF(imagePoint.X, imagePoint.Y), lastStableGaze);
+                    }
                 }
             }
             if (!newGazeCursor.IsEmpty)
